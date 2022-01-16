@@ -1,0 +1,251 @@
+{% extends 'base.html.twig' %}
+{% block title %}
+    Liste des calls 
+{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" integrity="sha256-16PDMvytZTH9heHu9KBPjzrFTaoner60bnABykjNiM0=" crossorigin="anonymous">
+        
+    {% endblock %}
+    {% block body %}
+    {% include "main/base/nav.html.twig" %}
+    {% include "main/base/sidebar.html.twig" %}
+    <div class="content-page">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between my-schedule mb-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h4>
+                                Manage ton calendrier
+                            </h4>
+                        </div>
+                        <div class="create-workform">
+                            <button type="button" id="addEvent" class="btn btn-primary position-relative d-flex align-items-center justify-content-between" data-toggle="modal" data-target="#modalAddEvent" data-post="{{ path('app_add_event') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2" width="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Ajouter un évènement
+                                                        
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card card-block card-stretch">
+                                <div class="card-body">
+                                    <div id="calendar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal addEvent -->
+        <div class="modal fade" id="modalAddEvent" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-between align-items-center pb-3">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                Ajouter un nouvel évènement
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">
+                                    &times;
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="titleEvent" class="form-label font-weight-bold text-muted text-uppercase">
+                                    Titre
+                                </label>
+                                <input type="text" class="form-control" id="titleEvent" placeholder="Entrez le titre de l'évènement"></div>
+                                <div class="col-md-12">
+                                    <label class="form-label font-weight-bold text-muted text-uppercase">
+                                        Date & Heure
+                                    </label>
+                                </div>
+                                <div class="col-md-6 mb-3">
+
+                                    <div class="input-group">
+                                        <input type="datetime-local" class="form-control" id="startTimeEvent" name="range-start" placeholder="Date de début"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="input-group">
+                                            <input type="datetime-local" class="form-control" id="endTimeEvent" name="range-end" placeholder="Date de fin"></div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label font-weight-bold text-muted text-uppercase">
+                                                Couleurs
+                                            </label>
+                                            <div class="input-group">
+                                                <select name="color-select" id="color-select" class="form-control">
+                                                    <option value="1">
+                                                        Lavande
+                                                    </option>
+                                                    <option value="2">
+                                                        Vert sauge
+                                                    </option>
+                                                    <option value="3">
+                                                        Violet raisin
+                                                    </option>
+                                                    <option value="4">
+                                                        Rose clair
+                                                    </option>
+                                                    <option value="5">
+                                                        Jaune banane
+                                                    </option>
+                                                    <option value="6">
+                                                        Orange mandarine
+                                                    </option>
+                                                    <option value="7">
+                                                        Bleu
+                                                    </option>
+                                                    <option value="8">
+                                                        Gris anthracite
+                                                    </option>
+                                                    <option value="9">
+                                                        Myrtille
+                                                    </option>
+                                                    <option value="10">
+                                                        Vert basilic
+                                                    </option>
+                                                    <option value="11">
+                                                        Rouge tomate
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="descriptionEvent" class="form-label font-weight-bold text-muted text-uppercase">
+                                                Description
+                                            </label>
+                                            <textarea class="form-control" id="descriptionEvent" rows="2" placeholder="Entrez une description"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" id="createEvent" class="btn btn-primary" data-dismiss="modal">
+                                            Ajouter l'évènement
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% include 'main/base/footer.html.twig' %}
+
+            <!-- Fullcalender Javascript -->
+            <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js" integrity="sha256-XOMgUu4lWKSn8CFoJoBoGd9Q/OET+xrfGYSo+AKpFhE=" crossorigin="anonymous"></script>
+            <script>
+                window.onload = () => {
+                    let calendarElt = document.querySelector("#calendar");
+            
+                    let calendar = new FullCalendar.Calendar(calendarElt, {
+                        initialView: 'timeGridWeek',
+                        locale: 'fr',
+                        timeZone: 'Europe/Paris',
+                        headerToolbar: {
+                            start: 'prev,next today',
+                            center: 'title',
+                            end: 'dayGridMonth,timeGridWeek'
+                        },
+                        buttonText: {
+                            today: 'Aujourd\'hui',
+                            month: 'Mois',
+                            week: 'Semaine',
+                            list: 'Liste'
+                        },
+                        events: {{ data|raw }},    
+                        nowIndicator: true,
+                        contentHeight: "auto",
+                        firstDay: 1,
+                        selectable: true,
+                        eventClick: function(info) {
+                            $.ajax({
+                                type: 'POST',
+                                url: '/app/one-event',
+                                data: {'email': info.event.extendedProps.invitee},
+                                success: function(data) {
+                                    window.open('/app/contact-view/' + data.uri + '/' + data.start_date + '/' + data.end_date);
+                                }
+                            })
+                        }
+                    })
+            
+                    let createEvent = document.getElementById('createEvent');
+                    let url = document.getElementById('addEvent').getAttribute('data-post');
+            
+                    createEvent.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        let titleEvent = document.getElementById('titleEvent').value;
+                        let startTimeEvent = document.getElementById('startTimeEvent').value;
+                        let endTimeEvent = document.getElementById('endTimeEvent').value;
+                        let descriptionEvent = document.getElementById('descriptionEvent').value;
+                        let colorEvent = document.getElementById('color-select').value;
+            
+                        if (titleEvent !== '' && startTimeEvent !== '' && endTimeEvent !== '' && descriptionEvent !== '') {
+            
+                            $.ajax({
+                                type: 'POST',
+                                url: url,
+                                data: { 'titleEvent': titleEvent, 'startTimeEvent': startTimeEvent, 'endTimeEvent': endTimeEvent, 'descriptionEvent': descriptionEvent, 'colorId': colorEvent },
+                                success: function(data) {
+                                    console.log(data);
+                                    if(data.colorId == '1'){
+                                        data.colorId = '#7887cb'
+                                    }else if(data.colorId == '2'){
+                                        data.colorId = '#34b579'
+                                    }else if(data.colorId == '3'){
+                                        data.colorId = '#8f24aa'
+                                    }else if(data.colorId == '4'){
+                                        data.colorId = '#e77c73'
+                                    }else if(data.colorId == '5'){
+                                        data.colorId = '#f6be25'
+                                    }else if(data.colorId == '6'){
+                                        data.colorId = '#f5511e'
+                                    }else if(data.colorId == '8'){
+                                        data.colorId = '#616161'
+                                    }else if(data.colorId == '9'){
+                                        data.colorId = '#4050b5'
+                                    }else if(data.colorId == '10'){
+                                        data.colorId = '#0c8043'
+                                    }else if(data.colorId == '11'){
+                                        data.colorId = '#059be5'
+                                    }else{
+                                        data.colorId = '#059be5'
+                                    }
+                                    calendar.addEvent({
+                                        title: data.summary,
+                                        start: data.start.dateTime,
+                                        end: data.end.dateTime,
+                                        backgroundColor: data.colorId,
+                                        borderColor: data.colorId
+                                    });
+                                }
+                            })
+                        } else {
+                            console.log(titleEvent);
+                            console.log(startTimeEvent);
+                            console.log(endTimeEvent);
+                            console.log(descriptionEvent);
+                            console.log('nn')
+                        }
+            
+                    })
+            
+                    calendar.render();
+            
+            
+            
+                }
+            </script>
+            
+            {% endblock %}

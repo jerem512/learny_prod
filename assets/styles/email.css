@@ -1,0 +1,45 @@
+.close:hover {
+    cursor: pointer !important;
+}
+
+.timeline>li>.timeline-badge {
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    line-height: 50px;
+    font-size: 1.4em;
+    text-align: center;
+    position: absolute;
+    top: 0px;
+    left: 20px;
+    margin-left: -15px;
+    background-color: #fff;
+    border: 1px solid #38568C;
+    z-index: 2;
+    border-top-right-radius: 50%;
+    border-top-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+}
+
+.timeline>li>.timeline-badge>svg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini {
+    font-size: 0.75em;
+}
+
+.question {
+    background-color: rgba(60, 60, 60, 0.1);
+}
+
+table {
+    table-layout: fixed;
+}
+
+.wrap {
+    hyphens: auto;
+}

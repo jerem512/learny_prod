@@ -1,0 +1,24 @@
+{% block body %}
+    <!-- Modal -->
+
+        <div class="modal-header">
+            <h5 class="modal-title" id="recipient-name">
+                Liste des mails envoyés
+            </h5>
+            <i class="fa fa-times close" data-dismiss="modal"></i>
+        </div>
+        
+        <div class="modal-body">
+        {% if infos_sequences.data.steps_sequences is not empty %}
+            {% for infos_seq in infos_sequences.data.steps_sequences|reverse %}
+                <h6>{{ loop.index }} - {{ infos_seq.mail.titre|replace({"&#39;" : "'"})|default }}</h6>
+                <p class="mb-0 mb-3 text-muted">{{ infos_seq.mail.sujet|replace({"&#39;" : "'"})|default }}</p>
+            {% endfor %}
+        {% else %}
+            <p class="mx-5 text-muted text-center">Auncune information n'est disponible pour cette séquence.</p>
+        {% endif %}
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+        </div>
+{% endblock %}    
+

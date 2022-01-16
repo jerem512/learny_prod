@@ -1,0 +1,251 @@
+{% extends 'base.html.twig' %} 
+{% block title %}Profil | {{ app.user.firstName }}{% endblock %} 
+
+{% block body %}
+<div class="wrapper">
+    {% include 'main/base/sidebar.html.twig' %} 
+    
+    {% include 'main/base/nav.html.twig' %}
+
+    <div class="content-page">
+        
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="iq-edit-list usr-edit">
+                                <ul class="iq-edit-profile d-flex nav nav-pills">
+                                    <li class="col-md-3 p-0">
+                                        <a class="nav-link active" data-toggle="pill" href="#personal-information">
+                                            Informations personelles
+                                        </a>
+                                    </li>
+                                    <li class="col-md-3 p-0">
+                                        <a class="nav-link" data-toggle="pill" href="#chang-pwd">
+                                            Changer de mot de passe
+                                        </a>
+                                    </li>
+                                    <li class="col-md-3 p-0">
+                                        <a class="nav-link" data-toggle="pill" href="#manage-contact">
+                                            Manager votre contact
+                                        </a>
+                                    </li>
+                                    <li class="col-md-3 p-0">
+                                        <a class="nav-link" data-toggle="pill" href="#manage-mail">
+                                            Mes modèles de mail
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="iq-edit-list-data">
+                        <div class="tab-content">
+                            <div class="tab-pane fade active show" id="personal-information" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <div class="header-title">
+                                            <h4 class="card-title">Informations personelles</h4>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        {{ form_start(personnalInfoForm) }}
+                                            <div class="form-group row align-items-center">
+                                                <div class="col-md-12">
+                                                    <div class="profile-img-edit">
+                                                        <div class="crm-profile-img-edit">
+                                                            {% if app.user.images is null %}
+                                                            <img class="crm-profile-pic rounded-circle avatar-100" id="profil_pic" src="{{ asset('images/user/1.jpg') }}" alt="profile-pic">
+                                                            {% else %}
+                                                            <img class="crm-profile-pic rounded-circle avatar-100" id="profil_pic" src="{{ asset('uploads/' ~ app.user.images.name) }}" alt="profile-pic">
+                                                            {% endif %}
+                                                            <div class="crm-p-image bg-primary" onclick="pro1()">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                                </svg>
+                                                                {{ form_row(personnalInfoForm.image) }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class=" row align-items-center">
+                                                <div class="form-group col-sm-6">
+                                                    <label for="change_personnal_data[last_name]">Prénom:</label>
+                                                    {{ form_row(personnalInfoForm.first_name) }}
+                                                </div>
+                                                <div class="form-group col-sm-6">
+                                                    <label for="change_personnal_data_last_name">Nom:</label>
+                                                    {{ form_row(personnalInfoForm.last_name) }}
+                                                </div>
+                                                <div class="form-group col-sm-6">
+                                                    <label for="pseudo">Pseudo:</label>
+                                                    {{ form_row(personnalInfoForm.pseudo) }}
+                                                </div>
+                                                <div class="form-group col-sm-6">
+                                                    <label for="cname">Ville:</label>
+                                                    {{ form_row(personnalInfoForm.city) }}
+                                                </div>
+
+                                                <div class="form-group col-sm-6">
+                                                    <label for="dob">Date d'anniversaire:</label>
+                                                    {{ form_row(personnalInfoForm.birthdate) }}
+                                                </div>
+                                                <div class="form-group col-sm-6">
+                                                    <label>Pays:</label>
+                                                        {{ form_row(personnalInfoForm.country) }}
+                                                </div>
+                                                <div class="form-group col-sm-12">
+                                                    <label>Adresse:</label>
+                                                        {{ form_row(personnalInfoForm.address) }}
+                                                </div>
+                                            </div>
+                                            <button type="reset" class="btn btn-outline-primary mr-2">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">Envoyer</button>
+                                            {{ form_end(personnalInfoForm) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="chang-pwd" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <div class="header-title">
+                                            <h4 class="card-title">Changement de mot de passe</h4>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        {{ form_start(editPasswordForm) }}
+                                        <div class="form-group">
+                                            <label for="cpass">Mot de passe actuel:</label>
+                                            <a href="javascripe:void();" class="float-right">Forgot Password</a>
+                                            {{ form_row(editPasswordForm.oldPassword) }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="npass">Nouveau mot de passe:</label>
+                                            {{ form_row(editPasswordForm.Password.first) }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="vpass">Vérification mot de passe:</label>
+                                            {{ form_row(editPasswordForm.Password.second) }}
+                                        </div>
+                                        <button type="reset" class="btn btn-outline-primary mr-2">Annuler</button>
+                                        <button type="submit" class="btn btn-primary">Modifier</button> 
+                                        {{ form_end(editPasswordForm) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="manage-contact" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <div class="header-title">
+                                            <h4 class="card-title">Manage Contact</h4>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        {{ form_start(changeContactForm) }}
+                                            <div class="form-group">
+                                                <label for="cno">Numéro de contact:</label>
+                                                {{ form_row(changeContactForm.contact_number) }}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="cno">Numéro ringover:</label>
+                                                {{ form_row(changeContactForm.ringover_phone_number) }}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="email">Email:</label>
+                                                {{ form_row(changeContactForm.email) }}
+                                            </div>
+
+                                            <button type="reset" class="btn btn-outline-primary mr-2">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">Modifier</button>
+                                            {{ form_end(changeContactForm) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="manage-mail" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <div class="header-title">
+                                            <h4 class="card-title">Manage tes emails</h4>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table data-table mb-0 mt-2 text-center">
+                                                <thead class="table-color-heading">
+                                                <tr>
+                                                    <th>Nom</th>
+                                                    <th>Objet</th>
+                                                    <th>Corps</th>
+                                                    <th class="no-action">Actions</th>
+                                                    <th class="no-action"><a class="text-dark" href="{{ path('app_model_mail_new') }}">+</a></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for models in show_model %}
+                                                        <tr class="white-space-no-wrap">
+                                                            <td>{{ models.name }}</td>
+                                                            <td>{{ models.modelObject|u.truncate(40, '[...]', false) }}</td>
+                                                            <td>{{ models.modelBody|u.truncate(40, '[...]', false) }}</td> 
+                                                            <td>
+                                                                <div class="d-flex justify-content-end align-items-center">
+                                                                    <a class="" data-toggle="tooltip" data-placement="top" title="" data-original-title="Voir" href="{{ path('app_model_mail_show', { 'id' : models.id }) }}">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="text-secondary" width="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                        </svg>
+                                                                    </a>
+                                                                    <a class="" data-toggle="tooltip" data-placement="top" title="" data-original-title="Modifier" href="{{ path('app_model_mail_edit', { 'id' : models.id }) }}">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="text-secondary mx-4" width="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                                        </svg>
+                                                                    </a> 
+                                                                    <form method="post" action="{{ path('app_model_mail_delete', {'id': models.id}) }}" onsubmit="return confirm('Tu es sûr de vouloir supprimer ce modèle?');">
+                                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ models.id) }}">
+                                                                        <button class="btn btn-primary-outline p-0">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" class="text-danger" width="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                            </svg>
+                                                                        </button>   
+                                                                    </form>
+                                                                </div>
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let file = document.getElementById("change_personnal_data_image");
+    let tdElt = document.getElementsByClassName('no-action');
+    for(ind=0;ind<tdElt.length;ind++){
+        tdElt[ind].classList.remove("sorting");
+    }
+    console.log(tdElt);
+    //tdElt.removeAttr("aria-label");
+    
+    function pro1(){
+        file.click();
+    }
+
+    file.addEventListener('change', function(event){
+        let img = document.getElementById('profil_pic');
+        img.src = URL.createObjectURL(event.target.files[0]);
+    });
+</script>
+{% include 'main/base/footer.html.twig' %} 
+{% endblock %}

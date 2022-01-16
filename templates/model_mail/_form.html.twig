@@ -1,0 +1,20 @@
+{{ form_start(form_new_model) }}
+    <div class="form-group">
+        <label for="cno">Type du modèle:</label>
+        {{ form_row(form_new_model.Type) }}
+    </div>
+    <div class="form-group">
+        <label for="cno">Nom du modèle:</label>
+        {{ form_row(form_new_model.name) }}
+    </div>
+    <div class="form-group">
+        <label for="cno">Objet du modèle:</label>
+        {{ form_row(form_new_model.model_object) }}
+    </div>
+    <div class="form-group">
+        <label for="email">Corps du modèle:</label>
+        {{ form_row(form_new_model.model_body) }}
+    </div>
+    <button type="reset" class="btn btn-outline-primary mr-2">Annuler</button>
+    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+{{ form_end(form_new_model) }}

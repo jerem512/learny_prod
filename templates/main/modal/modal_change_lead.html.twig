@@ -1,0 +1,19 @@
+{% block body %}
+    <!-- Modal -->
+    {{ form_start(form_choose, { 'action': path('app_choose') }) }}
+        <div class="modal-header">
+            <h5 class="modal-title">
+                Choisissez à qui donner le lead
+            </h5>
+            <i class="fa fa-times close" data-dismiss="modal"></i>
+        </div>
+        <div class="modal-body">
+            {{ form_row(form_choose.user) }}
+            <input name="lead_id" type="hidden" value="{{ lead_id }}">
+        </div>
+        <div class="modal-footer">
+            <input type="submit" class="btn btn-primary" value="Demander">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+        </div>
+    {{ form_end(form_choose) }}
+{% endblock %}    

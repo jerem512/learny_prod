@@ -1,0 +1,21 @@
+{% block body %}
+    {{ form_start(form_sms, {'attr': {'id': 'form_person_edit', action: path('app_send_sms', {'id': id, 'id_user': id_user, 'tel_int': tel_int, 'tel_ext' : tel_ext})}}) }}
+    <!-- Modal -->
+        <div class="modal-header">
+            <h5 class="modal-title" id="recipient-name">
+                Préparation d'un SMS
+            </h5>
+            <i class="fa fa-times close" data-dismiss="modal"></i>
+        </div>
+        
+        <div class="modal-body">
+            <label for="" class="text-secondary">Message</label>
+            {{ form_row(form_sms.content) }}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            <input type="submit" class="btn btn-primary" value="Envoyer">
+        </div>
+    {{  form_end(form_sms) }}    
+{% endblock %}    
+

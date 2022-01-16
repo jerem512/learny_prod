@@ -1,0 +1,72 @@
+{% block body %}
+    <!-- Modal -->
+    {{ form_start(form_mail, {'attr': {'id': 'form_person_edit', action: path('app_send_mail', {'id': id, 'id_user': id_user}) }}
+    ) }} 
+    {{ dump() }}
+    <div class="modal-header">
+        <h5 class="modal-title" id="recipient-name">
+            Préparation du mail
+                
+        </h5>
+        <i class="fa fa-times close" data-dismiss="modal"></i>
+    </div>
+
+    <div class="modal-body">
+        <select name="mail_type" id="mail_type" class="form-control mb-3">
+            <option disabled selected>
+                -- Selectionnez un modèle --
+            </option>
+            <option value="libre">
+                Prise libre
+            </option>
+            {% for offer in mail_closing %}
+                <option value="{{ offer.name }}">
+                    {{ offer.name }}
+                </option>
+            {% endfor %}
+            <option disabled>
+                -- Propositions standarts --
+            </option>
+            <option disabled>
+                -- Premium --
+            </option>
+            {% for offer in premium %}
+                <option value="{{ offer.name }}">
+                    {{ offer.name }}
+                </option>
+            {% endfor %}
+            <option disabled>
+                -- Accompagnement --
+            </option>
+            {% for offer in accompagnement %}
+                <option value="{{ offer.name }}">
+                    {{ offer.name }}
+                </option>
+            {% endfor %}
+            <option disabled>
+                -- Mes mails --
+            </option>
+            {% for offer in own_mail %}
+                <option value="{{ offer.name }}">
+                    {{ offer.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <label for="" class="text-secondary">
+            Objet du mail
+        </label>
+        {{ form_row(form_mail.object) }}
+        <label for="" class="text-secondary">
+            Message
+        </label>
+        {{ form_row(form_mail.body_mail) }}
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Fermer
+        </button>
+        <input type="submit" class="btn btn-primary" value="Envoyer"></div>
+        {{ form_end(form_mail) }}
+    {% endblock %}
+    

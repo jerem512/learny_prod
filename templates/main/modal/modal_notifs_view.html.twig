@@ -1,0 +1,20 @@
+{% block body %}
+    <!-- Modal -->
+
+        <div class="modal-header">
+            <h5 class="modal-title" id="recipient-name">
+                Détail de la notification
+            </h5>
+            <i class="fa fa-times close" data-dismiss="modal"></i>
+        </div>
+        <div class="modal-body">
+            {% for infos in infos_notif %}
+                <h6>{{ infos.getNotificationTitle() }}</h6>
+                <p class="mb-0 mb-3 text-muted">{{ infos.getNotificationBody() }}</p>
+            {% endfor %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+        </div>
+{% endblock %}    
+
