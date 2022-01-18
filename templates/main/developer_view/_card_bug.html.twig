@@ -1,0 +1,35 @@
+<div class="card-header card-header-border d-flex justify-content-between">
+    <div class="header-title">
+        <h4 class="card-title">
+            Bug & Améliorations
+        </h4>
+    </div>
+</div>
+<div class="card-body-list">
+    <ul class="list-style-3 mb-0">
+    {% for bug in bugs|default %}
+        {% if bug.objectReport == 'bug' %}
+        <li class="p-3 list-item d-flex justify-content-start align-items-center">
+            <div class="avatar">
+                <img class="avatar avatar-img avatar-60 rounded" src="{{ asset('images/photo_bug.jpeg') }}" alt="1.jpg">
+            </div>
+            <div class="list-style-detail ml-3">
+                <h6>Bug recensé</h6>
+                <p>{{ bug.bodyReport|u.truncate(35, '...') }}</p>
+            </div>
+        </li>
+        {% else %}
+        <li class="p-3 list-item d-flex justify-content-start align-items-center">
+            <div class="avatar">
+                <img class="avatar avatar-img avatar-60 rounded" src="{{ asset('images/photo_idea.jpeg') }}" alt="1.jpg">
+            </div>
+            <div class="list-style-detail ml-3">
+                <h6>Idée d'amélioration</h6>
+                <p>{{ bug.bodyReport|u.truncate(35, '...') }}</p>
+            </div>
+        </li>
+        {% endif %}
+        
+    {% endfor %}
+    </ul>
+</div>

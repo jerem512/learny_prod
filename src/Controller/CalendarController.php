@@ -33,7 +33,7 @@ class CalendarController extends AbstractController
         $calendar = curl_init();
 
         curl_setopt_array($calendar, [
-            CURLOPT_URL => "https://www.googleapis.com/calendar/v3/calendars/" . $user_mail ."/events?maxResults=1465&orderBy=startTime&singleEvents=true",
+            CURLOPT_URL => "https://www.googleapis.com/calendar/v3/calendars/" . $user_mail ."/events?maxResults=2500&orderBy=startTime&singleEvents=true",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,

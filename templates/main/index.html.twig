@@ -135,8 +135,11 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-lg-4 col-md-8">
+                        </div>#}
+                        {% if app.user.roles[0] == 'ROLE_ADMIN' %}
+                            {{ include('main/developer_view/_card_bug.html.twig') }}
+                        {% endif %}
+                        {#<div class="col-lg-4 col-md-8">
                             <div class="card card-block card-stretch card-height">
                                 <div class="card-header card-header-border d-flex justify-content-between">
                                     <div class="header-title">
@@ -436,6 +439,22 @@
                         </div>#}
             </div>
         <!-- Page end  -->
+        </div>
+        <div class="modal" id="reportBugModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <!-- Modal -->
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rapporter un bug</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="reportBugBody">
+
+                        </div>
+                    </div>
+            </div>
         </div>
     </div>
 

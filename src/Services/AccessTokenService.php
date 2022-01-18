@@ -25,8 +25,7 @@ class AccessTokenService
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $tokenReturn = curl_exec($ch);
         $token = json_decode($tokenReturn);
-        
-        //var_dump($tokenReturn);
+
         $accessToken = $token->access_token;
 
         return $accessToken;

@@ -1,0 +1,12 @@
+{% block body %}
+    {{ form_start(form, {'attr': {'action': path('report_bug')}}) }}
+        {{ form_row(form.object_report) }}
+        {{ form_row(form.body_report) }}
+        <div class="modal-footer">
+            <button type="input" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>    
+    {{ form_end(form) }}
+    
+{% endblock %}    
+
