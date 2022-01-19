@@ -12,7 +12,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ReportBugController extends AbstractController
 {
-    #[Route('/report/bug', name: 'report_bug')]
+    /**
+     * @Route("/report/bug", name="report_bug")
+     */
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
         $report_bug = new ReportBug();
