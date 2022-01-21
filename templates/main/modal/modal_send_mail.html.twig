@@ -1,6 +1,6 @@
 {% block body %}
     <!-- Modal -->
-    {{ form_start(form_mail, {'attr': {'id': 'form_person_edit', action: path('app_send_mail', {'id': id, 'id_user': id_user}) }}
+    {{ form_start(form_mail, {'attr': {'id': 'form_person_edit', action: path('app_send_mail', {'id': id, 'lead_id': lead_id}) }}
     ) }} 
     {{ dump() }}
     <div class="modal-header">

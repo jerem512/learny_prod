@@ -6,19 +6,21 @@ use App\Entity\Users;
 use App\Entity\Category;
 use App\Entity\Mail;
 use App\Entity\NotificationsPathLeads;
-use App\Entity\Sms;
 use App\Entity\Notifs;
 use App\Form\CategoryType;
 use App\Form\LeadMembershipFormType;
 use App\Form\NotificationsPathLeadsType;
-use App\Form\SmsType;
 use App\Form\MailType;
 use App\Repository\CategoryRepository;
 use App\Repository\LeadMembershipRepository;
 use App\Repository\LeadRepository;
 use App\Repository\ModelMailRepository;
 use App\Repository\NotificationsPathLeadsRepository;
-use LearnyBox\Client;
+use App\Services\CheckTaxNumberService;
+use App\Services\ClientLearnyboxService;
+use App\Services\InfosCallService;
+use App\Services\InfosContactService;
+use App\Services\NotificationPathService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,83 +44,32 @@ class CalendlyController extends AbstractController
         LeadRepository $leadrepository,
         CategoryRepository $categoryRepository,
         NotificationsPathLeadsRepository $notificationsPathLeadsRepository,
+        ClientLearnyboxService $clientLearnyboxService,
+        InfosContactService $infosContactService,
+        InfosCallService $infosCallService,
+        CheckTaxNumberService $checkTaxService,
+        NotificationPathService $notificationsPathService,
         $uri,
         $start_date,
         $end_date
         ): Response {
 
-        $client = Client::create([
-            'api_key' => 'fdatfECqdfkGcjirnCBsmujGpgGvqFkDb',
-            'subdomain' => 'affiliation-ninja',
-        ]);
+        $user = $this->getUser();
+        $client = $clientLearnyboxService->clientLearnybox();
+        $contact_response = $infosContactService->getInfosContact($uri, $user);
+        $calls_response = $infosCallService->getInfosCall($user, $start_date, $end_date);
+        $lead_number = $contact_response->{'collection'}[0]->{'questions_and_answers'}[0]->{'answer'};
+        $block_call = $checkTaxService->checkTaxNumber($lead_number);
 
-        $token = $this->getUser()->getCalendlyToken();
-        $search = ['+', ' '];
-        $phone_number = str_replace($search, '', $this->getUser()->getRingoverPhoneNumber());
-
-        $contact = curl_init();
-
-        curl_setopt_array($contact, [
-            CURLOPT_URL => "https://api.calendly.com/scheduled_events/" . $uri . "/invitees?sort=created_at%3Adesc",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => [
-                "authorization: Bearer " . $token,
-            ],
-        ]);
-
-        $calls = curl_init();
-
-        curl_setopt_array($calls, [
-            CURLOPT_URL => 'https://public-api.ringover.com/v2/calls',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => '{
-                "filter": "ADVANCED",
-                "start_date": "' . $start_date . '",
-                "end_date": "' . $end_date . '",
-                "call_type": [
-                    "ANSWERED",
-                    "MISSED",
-                    "VOICEMAIL",
-                    "OUT"
-                ],
-                "advanced": {
-                    "int_numbers": ['
-            . intval($phone_number) .
-            ']
-
-                }
-            }',
-            CURLOPT_HTTPHEADER => [
-                'Authorization: fa2fba9a95fd360fcfe6994c7bd03aca11c8a7b0',
-                'Content-Type: text/plain',
-            ],
-        ]);
-
-        $calls_response = json_decode(curl_exec($calls));
-
-        $contact_response = curl_exec($contact);
-
-        $contact_parsed = json_decode($contact_response);
-
-        $contact_email = $contact_parsed->{'collection'}[0]->{'email'};
+        $NaN = $checkTaxService->isNumber($block_call);
+        
+        $contact_email = $contact_response->{'collection'}[0]->{'email'};
 
         $infos_contact = $leadrepository->findBy(['email' => $contact_email]);
 
-        $id = $infos_contact[0]->getIdContact();
-
-        $infos_api = $client->get('mail/contacts/' . $id);
-        $paid_state = $client->get('transactions/user/' . $id);
+        $lead_id = $infos_contact[0]->getIdContact();
+        $infos_api = $client->get('mail/contacts/' . $lead_id);
+        $paid_state = $client->get('transactions/user/' . $lead_id);
 
         $category = new Category();
 
@@ -127,35 +78,10 @@ class CalendlyController extends AbstractController
 
         if ($form_category->isSubmitted() && $form_category->isValid()) {
 
-            $category->setUserId($id);
+            $category->setUserId($lead_id);
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($category);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_contact_view', [
-                'uri' => $uri,
-                'start_date' => $start_date,
-                'end_date' => $end_date,
-                '_fragment' => 'activity',
-            ]);
-        }
-
-        $lead_category = $categoryRepository->findBy(['user_id' => $id]);
-
-        $notifications = new NotificationsPathLeads();
-
-        $form = $this->createForm(NotificationsPathLeadsType::class, $notifications);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $notifications->setCreatedAt(new \DateTimeImmutable('now'));
-            $notifications->setLeadId($id);
-            $notifications->setNotificationTitle('Notes du rendez-vous');
-            $notifications->setNotificationType('Notes');
-
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($notifications);
             $entityManager->flush();
 
             return $this->redirectToRoute('app_contact_view', [
@@ -165,17 +91,26 @@ class CalendlyController extends AbstractController
             ]);
         }
 
-        $number1 = $infos_api->{'data'}->{'tel'};
-        $number2 = $contact_parsed->{'collection'}[0]->{'questions_and_answers'}[0]->{'answer'};
-        $suisse = "+41";
-        $block_call = true;
+        $lead_category = $categoryRepository->findBy(['user_id' => $lead_id]);
+        $notifications = new NotificationsPathLeads();
 
-        if (strpos($number1, $suisse) || strpos($number2, $suisse) !== false) {
-            $block_call = false;
+        $form = $this->createForm(NotificationsPathLeadsType::class, $notifications);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $notificationsPathService->setNotificationPath($notifications, 'Notes', 'Notes du rendez-vous', $form->getData()->getNotificationBody(), new \DateTimeImmutable('now'), $lead_id);
+
+            return $this->redirectToRoute('app_contact_view', [
+                'uri' => $uri,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
         }
 
-        $notifications_view = $notificationsPathLeadsRepository->findBy(['lead_id' => $id], ['id' => 'DESC']);
-        //dd($calls_response);
+
+        $notifications_view = $notificationsPathLeadsRepository->findBy(['lead_id' => $lead_id], ['id' => 'DESC']);
+
         if($calls_response !== null){
             date_default_timezone_set('Europe/Paris');
             setlocale(LC_TIME, "fr_FR");
@@ -183,35 +118,25 @@ class CalendlyController extends AbstractController
             $date_call_immuable = new \DateTimeImmutable($date_call);
             $date_call_fr = strftime("%A %d %B %G à %H:%M", strtotime($date_call));
 
-            if(!empty($notificationsPathLeadsRepository->findBy(['notification_type' => 'Call', 'lead_id' => $id])) === false){
-                $notifications->setNotificationType('Call');
-                $notifications->setNotificationTitle('Début de l\'appel');
-                $notifications->setNotificationBody('Votre appel a débuté le ' . $date_call_fr);
-                $notifications->setCreatedAt($date_call_immuable);
-                $notifications->setLeadId($id);
-                
-                $entityManager = $this->getDoctrine()->getManager();
-                $entityManager->persist($notifications);
-                $entityManager->flush();
+            if(!empty($notificationsPathLeadsRepository->findBy(['notification_type' => 'Call', 'lead_id' => $lead_id])) === false){
+                $notificationsPathService->setNotificationPath($notifications, 'Call', 'Début de l\'appel', 'Votre appel a débuté le ' . $date_call_fr, $date_call_immuable, $lead_id);
             }
         }
 
-        
-        
-
         return $this->render('calendly/contact-view.html.twig', [
-            'contact_response' => $contact_parsed,
+            'contact_response' => $contact_response,
             'infos_contact' => $infos_contact,
             'email' => $contact_email,
             'infos' => $infos_api,
             'paid_state' => $paid_state,
-            'user_id' => $id,
+            'lead_id' => $lead_id,
             'infos_call' => $calls_response,
             'notification_form' => $form->createView(),
             'notification_view' => $notifications_view,
             'category_form' => $form_category->createView(),
             'category_lead' => $lead_category,
             'block_call' => $block_call,
+            'NaN' => $NaN,
             'uri' => $uri
         ]);
     }
@@ -219,14 +144,9 @@ class CalendlyController extends AbstractController
     /**
      * @Route("/sequences-view/{id_sequences}", name="sequences_view")
      */
-    public function sequencesView($id_sequences)
+    public function sequencesView(ClientLearnyboxService $clientLearnyboxService, $id_sequences)
     {
-
-        $client = Client::create([
-            'api_key' => 'fdatfECqdfkGcjirnCBsmujGpgGvqFkDb',
-            'subdomain' => 'affiliation-ninja',
-            'timeout' => 3000,
-        ]);
+        $client = $clientLearnyboxService->clientLearnybox();
 
         $infos_sequences = $client->get('mail/sequences/' . $id_sequences);
 
@@ -242,11 +162,6 @@ class CalendlyController extends AbstractController
     public function notifView(NotificationsPathLeadsRepository $notificationspathleadsrepository, $id_notif)
     {
 
-        $client = Client::create([
-            'api_key' => 'fdatfECqdfkGcjirnCBsmujGpgGvqFkDb',
-            'subdomain' => 'affiliation-ninja',
-        ]);
-
         $infos_notif = $notificationspathleadsrepository->findBy(['id' => $id_notif]);
 
         return $this->render('main/modal/modal_notifs_view.html.twig', [
@@ -256,68 +171,16 @@ class CalendlyController extends AbstractController
     }
 
     /**
-     * @Route("/send-sms/{id}/{id_user}/{tel_int}/{tel_ext}", name="send_sms")
+     * @Route("/send_mail/{id}/{lead_id}", name="send_mail")
      */
-    public function sendSms(
-        Request $request,
-        $id,
-        $id_user,
-        $tel_int,
-        $tel_ext,
-        NotificationsPathLeadsRepository $notificationsPathLeadsRepository
-    ) {
-        $sms = new Sms();
-        $notifications = new NotificationsPathLeads();
+    public function sendMail(Request $request, MailerInterface $mailer, ClientLearnyboxService $clientLearnyboxService, NotificationPathService $notificationsPathService, Users $users, ModelMailRepository $modelMailRepository,$id, $lead_id) {
 
-        $form_sms = $this->createForm(SmsType::class, $sms);
-        $form_sms->handleRequest($request);
-
-        if ($form_sms->isSubmitted() && $form_sms->isValid()) {
-            $sms->setSender($tel_int);
-            $sms->setRecipient($tel_ext);
-            $sms->setCreatedAt(new \DateTimeImmutable('now'));
-
-            $notifications->setNotificationType('Sms');
-            $notifications->setNotificationTitle('Sms');
-            $notifications->setNotificationBody($sms->getContent());
-            $notifications->setCreatedAt(new \DateTimeImmutable('now'));
-            $notifications->setLeadId($id_user);
-
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($notifications);
-            $entityManager->persist($sms);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_main', [
-                'id' => $id,
-                'id_user' => $id_user,
-            ]);
-        }
-
-        return $this->render('main/modal/modal_sms_view.html.twig', [
-            'id' => $id,
-            'id_user' => $id_user,
-            'tel_int' => $tel_int,
-            'tel_ext' => $tel_ext,
-            'form_sms' => $form_sms->createView(),
-        ]);
-    }
-
-    /**
-     * @Route("/send_mail/{id}/{id_user}", name="send_mail")
-     */
-    public function sendMail(Request $request, MailerInterface $mailer, NotificationsPathLeadsRepository $notificationsPathLeadsRepository, Users $users, ModelMailRepository $modelMailRepository,$id, $id_user) {
-
-        $client = Client::create([
-            'api_key' => 'fdatfECqdfkGcjirnCBsmujGpgGvqFkDb',
-            'subdomain' => 'affiliation-ninja'
-        ]);
+        $client = $clientLearnyboxService->clientLearnybox();
 
         $mail = new Mail();
         $notifications = new NotificationsPathLeads();
 
-        $name = $client->get('users/' . $id_user)->{'data'}->{'fname'};
-
+        $name = $client->get('users/' . $lead_id)->{'data'}->{'fname'};
 
         $form = $this->createForm(MailType::class, $mail);
         $form->handleRequest($request); 
@@ -325,46 +188,33 @@ class CalendlyController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             
             $sender = $users->getEmail();
+            $recipient = $client->get('users/' . $lead_id)->{'data'}->{'email'};
+            $message = $mail->getBodyMail();
             
-            $recipient = $client->get('users/' . $id_user)->{'data'}->{'email'};
-
-            $notifications->setCreatedAt(new \DateTimeImmutable('now'));
-            $notifications->setLeadId($id_user);
-            
-            if($_POST['mail_type'] == 'Premiumx1' || 
-            $_POST['mail_type'] == 'Premiumx2' ||
-            $_POST['mail_type'] == 'Premiumx3' ||
-            $_POST['mail_type'] == 'Premiumx6' ||
-            $_POST['mail_type'] == 'Premiumx12'){
-                $notifications->setNotificationType('Proposition');
-                $notifications->setNotificationTitle('Proposition d\'un pack ' . $_POST['mail_type']);
-                $notifications->setNotificationBody($mail->getBodyMail());
-            }elseif($_POST['mail_type'] == 'Accompagnementx1' || 
-            $_POST['mail_type'] == 'Accompagnementx2' ||
-            $_POST['mail_type'] == 'Accompagnementx3' ||
-            $_POST['mail_type'] == 'Accompagnementx6' ||
-            $_POST['mail_type'] == 'Accompagnementx12'){
-                $notifications->setNotificationType('Proposition');
-                $notifications->setNotificationTitle('Proposition d\'un pack ' . $_POST['mail_type']);
-                $notifications->setNotificationBody($mail->getBodyMail());
+            if($request->request->get('mail_type') == 'Premiumx1' || 
+            $request->request->get('mail_type') == 'Premiumx2' ||
+            $request->request->get('mail_type') == 'Premiumx3' ||
+            $request->request->get('mail_type') == 'Premiumx6' ||
+            $request->request->get('mail_type') == 'Premiumx12'){
+                $notificationType = 'Proposition';
+                $notificationTitle = 'Proposition d\'un pack ' . $request->request->get('mail_type');
+            }elseif($request->request->get('mail_type') == 'Accompagnementx1' || 
+            $request->request->get('mail_type') == 'Accompagnementx2' ||
+            $request->request->get('mail_type') == 'Accompagnementx3' ||
+            $request->request->get('mail_type') == 'Accompagnementx6' ||
+            $request->request->get('mail_type') == 'Accompagnementx12'){
+                $notificationType = 'Proposition';
+                $notificationTitle = 'Proposition d\'un pack ' . $request->request->get('mail_type');
             }else{
-                $notifications->setNotificationType('Mail');
-                $notifications->setNotificationTitle($mail->getObject());
-                $notifications->setNotificationBody($mail->getBodyMail());
+                $notificationType = 'Mail';
+                $notificationTitle =$mail->getObject();
             }
             
-
-
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($notifications);
-            $entityManager->flush();
+            $notificationsPathService->setNotificationPath($notifications, $notificationType, $notificationTitle, $message, new \DateTimeImmutable('now'), $lead_id);
             
-
             $mail->setSender($sender);
             $mail->setRecipient($recipient);
             $mail->setCreatedAt(new \DateTimeImmutable('now'));
-            $message = $mail->getBodyMail();
-            //dd($mail->getBodyMail());
 
             $adress = new Address($recipient);
             $send = (new TemplatedEmail())
@@ -375,7 +225,6 @@ class CalendlyController extends AbstractController
                 ->context([
                     'message' => $message
                 ]);
-                //dd($send);
             $mailer->send($send);
 
             $entityManager = $this->getDoctrine()->getManager();
@@ -386,7 +235,7 @@ class CalendlyController extends AbstractController
 
             return $this->redirectToRoute('app_home', [
                 'id' => $id,
-                'id_user' => $id_user
+                'lead_id' => $lead_id
             ]);
         }
 
@@ -399,7 +248,7 @@ class CalendlyController extends AbstractController
             'form_mail' => $form->createView(),
             'model_mail' => $modelMailRepository->findBy(['model_mail' => $id]),
             'id' => $id,
-            'id_user' => $id_user,
+            'lead_id' => $lead_id,
             'name' => $name,
             'accompagnement' => $accompagnement,
             'premium' => $premium,
@@ -417,11 +266,9 @@ class CalendlyController extends AbstractController
         $user = $this->getUser();
         
         $lead_id = $request->query->get('lead_id');
-        //dd($lead_id);
+
         $form_choose = $this->createForm(LeadMembershipFormType::class);
         $form_choose->handleRequest($request);
-
-        
 
         if($request->isMethod('POST')){
             $notifications = new Notifs();
