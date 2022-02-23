@@ -25,6 +25,7 @@ Encore
     .addEntry('calendar', './assets/js/calendar.js')
     .addEntry('main', './assets/js/main.js')
     .addEntry('call', './assets/js/call.js')
+    .addEntry('contact', './assets/js/contact.js')
 
 // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
 .enableStimulusBridge('./assets/controllers.json')

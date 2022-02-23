@@ -4,8 +4,8 @@ namespace App\Command;
 
 use App\Entity\Lead;
 use App\Repository\LeadRepository;
+use App\Services\ClientLearnyboxService;
 use App\Services\saveLeadService;
-use LearnyBox\Client;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,22 +15,23 @@ class RefreshContactMailCommand extends Command
 
     private $leadRepository;
     private $saveLeadService;
+    private $clientLearnyboxService;
+
     protected static $defaultName = 'app:refresh-contact';
 
-    public function __construct(LeadRepository $leadRepository, saveLeadService $saveLeadService)
+    public function __construct(LeadRepository $leadRepository, saveLeadService $saveLeadService, ClientLearnyboxService $clientLearnyboxService)
     {
         $this->leadRepository = $leadRepository;
         $this->saveLeadService = $saveLeadService;
+        $this->clientLearnyboxService = $clientLearnyboxService;
+
         parent::__construct();
     }
 
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $client = Client::create([
-            'api_key' => 'fdatfECqdfkGcjirnCBsmujGpgGvqFkDb',
-            'subdomain' => 'affiliation-ninja'
-        ]);
+        $client = $this->clientLearnyboxService->clientLearnybox();
 
         $total = $client->get('mail/contacts')->{'total'};
         $count = $this->leadRepository->countLead();

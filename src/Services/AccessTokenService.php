@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-
 class AccessTokenService
 {
 

@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-class saveLeadService
+class SaveMemberCpfService
 {
 
     public function __construct(EntityManagerInterface $em)
@@ -12,9 +12,9 @@ class saveLeadService
         $this->em = $em;        
     }
     
-    public function saveLead($lead){
+    public function saveMemberCpf($member){
         $entityManager = $this->em;
-        $entityManager->persist($lead);
+        $entityManager->persist($member);
         $entityManager->flush();
     }
 }

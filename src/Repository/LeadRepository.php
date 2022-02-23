@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Lead;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @method Lead|null find($id, $lockMode = null, $lockVersion = null)
@@ -29,6 +30,17 @@ class LeadRepository extends ServiceEntityRepository
                     ");
 
         return $qb->getResult();
+    }
+
+    public function like($search)
+    {
+        $entityManager = $this->getEntityManager();
+
+        $qb = $entityManager->createQuery("SELECT l FROM  App\Entity\Lead l WHERE l.email LIKE '%$search%'");
+
+        $result = $qb->getArrayResult();
+
+        return new JsonResponse($result);
     }
 
     // /**

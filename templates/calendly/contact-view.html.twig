@@ -120,13 +120,6 @@
                                                 {% endif %}
                                             {% endif %}
                                         </div>
-
-
-
-
-
-
-
                                         <div class="col-12 text-center mb-2">
                                             <button class="btn btn-block btn-sm btn-primary" id="btn_modal_mail" data-target="{{ path('app_send_mail', {'id': app.user.id, 'lead_id': lead_id}) }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2" fill="none" width="20" viewBox="0 0 24 24" stroke="currentColor">
@@ -138,7 +131,7 @@
                                             </button>
                                         </div>
                                         <div class="col-6 text-center mb-2">
-                                            <a href="https://calendly.com/cancellations/{{ uri }}" id="cancel_call">
+                                            <a href="https://calendly.com/cancellations/{{ uri|default }}" id="cancel_call">
                                                 <button class="btn btn-block btn-sm btn-outline-danger">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="mr-2" width="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -149,7 +142,7 @@
                                                 </button>
                                             </a>
                                         </div>
-                                        <div class="col-6 text-center mb-2">
+                                        {#<div class="col-6 text-center mb-2">
                                             <button class="btn btn-block btn-sm btn-outline-warning" id="give_call" data-target="{{ path('app_choose') }}" data="{{ lead_id }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2" width="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3h5m0 0v5m0-5l-6 6M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" />
@@ -158,7 +151,7 @@
                                                     Donner le call
                                                 </span>
                                             </button>
-                                        </div>
+                                        </div>#}
                                     </div>
                                 </li>
                                 <li class="list-group-item">
@@ -181,26 +174,26 @@
                                                     Téléphone
                                                 </p>
                                             </td>
-
-                                            {% if contact_response.collection[0].text_reminder_number is not null %}
-                                                <td>
-                                                    <p class="mb-0 ">
-                                                        {{ contact_response.collection[0].text_reminder_number|default }}
-                                                    </p>
-                                                </td>
-                                            {% elseif contact_response.collection[0].questions_and_answers[1].answer is not null %}
-                                                <td>
-                                                    <p class="mb-0">
-                                                        {{ contact_response.collection[0].questions_and_answers[1].answer|default }}
-                                                    </p>
-                                                </td>
-                                            {% else %}
-                                                <td>
-                                                    <p class="mb-0 ">
-                                                        {{ infos.data.tel|default }}
-                                                    </p>
-                                                </td>
-                                            {% endif %}
+                                            {% if contact_response.collection[0].text_reminder_number|default is not null %}
+                                            <td>
+                                                <p class="mb-0 ">
+                                                    {{ contact_response.collection[0].text_reminder_number|default }}
+                                                </p>
+                                            </td>
+                                        {% elseif contact_response.collection[0].questions_and_answers[1].answer|default is not null %}
+                                            <td>
+                                                <p class="mb-0">
+                                                    {{ contact_response.collection[0].questions_and_answers[1].answer|default }}
+                                                </p>
+                                            </td>
+                                        {% else %}
+                                            <td>
+                                                <p class="mb-0 ">
+                                                    {{ infos.data.tel|default }}
+                                                </p>
+                                            </td>
+                                        {% endif %}
+                                            
                                         </tr>
                                         <tr>
                                             <td class="p-0">
@@ -579,7 +572,7 @@
                                             <div class="table-responsive">
                                                 <table class="table mb-0">
                                                     <tbody>
-                                                        {% for answers in contact_response.collection[0].questions_and_answers %}
+                                                        {% for answers in contact_response.collection[0].questions_and_answers|default %}
                                                             <tr class="text-left">
                                                                 <td class="question">
                                                                     <p class="mb-0 wrap">
@@ -816,6 +809,7 @@
 
             {% include 'main/base/footer.html.twig' %}
             {% block javascripts %}
+                {{ encore_entry_script_tags('app') }}
                 {{ encore_entry_script_tags('email') }}
                 {{ encore_entry_script_tags('call') }}
             {% endblock %}

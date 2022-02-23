@@ -20,14 +20,34 @@
 <body class="sidebar-main">
     <div class="wrapper">
         {% block body %}{% endblock %}
+        <div class="modal" id="reportBugModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <!-- Modal -->
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Rapporter un bug
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">
+                                &times;
+                            </span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="reportBugBody"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
 
     <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
     {% block javascripts %}
-        {{ encore_entry_script_tags('app') }}
+
     {% endblock %}
+
+    {{ encore_entry_script_tags('app') }}
     
     <script src="{{ asset('js/backend-bundle.min.js') }}"></script>
     <!-- Chart Custom JavaScript -->

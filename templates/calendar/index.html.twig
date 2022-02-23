@@ -120,6 +120,10 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-md-12 mb-3 checkbox">
+                                            <label class="form-label font-weight-bold text-muted text-uppercase">Est-ce un follow-up ?</label><input id="is_fup" type="checkbox" class="ml-1 form-check-input">
+                                            <input id="input_fup" type="text" class="form-control  d-none" placeholder="Entrez le mail du fup">
+                                        </div>
                                         <div class="col-md-12 mb-3">
                                             <label for="descriptionEvent" class="form-label font-weight-bold text-muted text-uppercase">
                                                 Description
@@ -143,8 +147,21 @@
 
             <!-- Fullcalender Javascript -->
             <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js" integrity="sha256-XOMgUu4lWKSn8CFoJoBoGd9Q/OET+xrfGYSo+AKpFhE=" crossorigin="anonymous"></script>
+        
             <script>
                 window.onload = () => {
+
+                let checkBox = document.getElementById('is_fup');
+                let inputFup = document.getElementById('input_fup');
+        
+                checkBox.addEventListener('click', function(){        
+                    if(checkBox.checked == true){
+                        inputFup.classList.remove('d-none');
+                    }else{
+                        inputFup.classList.add('d-none');
+                    }
+                });
+
                     let calendarElt = document.querySelector("#calendar");
             
                     let calendar = new FullCalendar.Calendar(calendarElt, {
@@ -173,7 +190,7 @@
                                 url: '/app/one-event',
                                 data: {'email': info.event.extendedProps.invitee},
                                 success: function(data) {
-                                    window.open('/app/contact-view/' + data.uri + '/' + data.start_date + '/' + data.end_date);
+                                    window.open('/app/contact-view/' + data);
                                 }
                             })
                         }
@@ -189,13 +206,12 @@
                         let endTimeEvent = document.getElementById('endTimeEvent').value;
                         let descriptionEvent = document.getElementById('descriptionEvent').value;
                         let colorEvent = document.getElementById('color-select').value;
+                        let fupEvent = inputFup.value;
             
-                        if (titleEvent !== '' && startTimeEvent !== '' && endTimeEvent !== '' && descriptionEvent !== '') {
-            
-                            $.ajax({
+                        $.ajax({
                                 type: 'POST',
                                 url: url,
-                                data: { 'titleEvent': titleEvent, 'startTimeEvent': startTimeEvent, 'endTimeEvent': endTimeEvent, 'descriptionEvent': descriptionEvent, 'colorId': colorEvent },
+                                data: { 'titleEvent': titleEvent, 'startTimeEvent': startTimeEvent, 'endTimeEvent': endTimeEvent, 'descriptionEvent': descriptionEvent, 'colorId': colorEvent, 'fupEvent': fupEvent },
                                 success: function(data) {
                                     console.log(data);
                                     if(data.colorId == '1'){
@@ -230,13 +246,6 @@
                                     });
                                 }
                             })
-                        } else {
-                            console.log(titleEvent);
-                            console.log(startTimeEvent);
-                            console.log(endTimeEvent);
-                            console.log(descriptionEvent);
-                            console.log('nn')
-                        }
             
                     })
             

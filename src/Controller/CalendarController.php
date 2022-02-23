@@ -66,6 +66,9 @@ class CalendarController extends AbstractController
         $endTimeEvent = $request->request->get('endTimeEvent');
         $descriptionEvent = $request->request->get('descriptionEvent');
         $colorId = $request->request->get('colorId');
+        $mailFup = $request->request->get('fupEvent');
+
+        //dd($mailFup);
 
         $accessToken = $accessTokenService->accessToken($user);
 
@@ -82,7 +85,7 @@ class CalendarController extends AbstractController
             CURLOPT_HTTPHEADER => [
                 "authorization: Bearer " . $accessToken,
             ],
-            CURLOPT_POSTFIELDS => "{\"end\":{\"dateTime\":\"" . $endTimeEvent .":00+01:00\",\"timeZone\":\"Europe/Paris\"},\"start\":{\"dateTime\":\"" . $startTimeEvent . ":00+01:00\",\"timeZone\":\"Europe/Paris\"},\"summary\":\"" . $titleEvent . "\",\"colorId\":\"" . $colorId . "\",\"description\":\"" . $descriptionEvent . "\"}",
+            CURLOPT_POSTFIELDS => "{\"end\":{\"dateTime\":\"" . $endTimeEvent .":00+01:00\",\"timeZone\":\"Europe/Paris\"},\"start\":{\"dateTime\":\"" . $startTimeEvent . ":00+01:00\",\"timeZone\":\"Europe/Paris\"},\"attendees\":[{\"email\":\"" . $mailFup ."\"}],\"summary\":\"" . $titleEvent . "\",\"colorId\":\"" . $colorId . "\",\"description\":\"" . $descriptionEvent . "\"}",
             CURLOPT_ENCODING => 'gzip, deflate'
         ]);
 
@@ -99,37 +102,14 @@ class CalendarController extends AbstractController
     public function event(Request $request, LeadRepository $leadRepository, NotificationsPathLeadsRepository $notificationsPathLeadsRepository, LeadMembershipRepository $leadMembershipRepository){
 
 
-        $one_event = curl_init();
         $user = $this->getUser();
-        //$lead_infos = Lead();
-        $token = $user->getCalendlyToken();
-        $uuid = $user->getuuidCalendly();
         $mail = $request->request->get('email');
         $lead = $leadRepository->findby(['email' => $mail]);
+        
         $lead_id = $lead[0]->getIdContact();
         $lead_name = $lead[0]->getFirstName();
         $date_call_immuable = new \DateTimeImmutable();
-
-        curl_setopt_array($one_event, [
-            CURLOPT_URL => "https://api.calendly.com/scheduled_events?user=https://api.calendly.com/users/" . $uuid . "&invitee_email=" . $mail,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => [
-                "authorization: Bearer " . $token,
-            ],
-        ]);
-
-        $event = json_decode(curl_exec($one_event));
-
-        $items = [
-            'uri' => str_replace('https://api.calendly.com/scheduled_events/', '', $event->{'collection'}[0]->{'uri'}),
-            'start_date' => $event->{'collection'}[0]->{'start_time'},
-            'end_date' => $event->{'collection'}[0]->{'end_time'}
-        ];
+        
 
         if(!empty($notificationsPathLeadsRepository->findBy(['notification_type' => 'Appointment', 'lead_id' => $lead_id])) === false){
             $date = $event->{'collection'}[0]->{'start_time'};
@@ -158,8 +138,7 @@ class CalendarController extends AbstractController
             $entityManager->flush();
         }
 
-        return new JsonResponse($items);
-        
+        return new JsonResponse($lead_id);
     }
 
     /**

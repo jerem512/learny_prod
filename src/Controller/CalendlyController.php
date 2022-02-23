@@ -18,6 +18,7 @@ use App\Repository\ModelMailRepository;
 use App\Repository\NotificationsPathLeadsRepository;
 use App\Services\CheckTaxNumberService;
 use App\Services\ClientLearnyboxService;
+use App\Services\FindCalendlyInfos;
 use App\Services\InfosCallService;
 use App\Services\InfosContactService;
 use App\Services\NotificationPathService;
@@ -37,11 +38,11 @@ class CalendlyController extends AbstractController
 {
 
     /**
-     * @Route("/contact-view/{uri}/{start_date}/{end_date}", name="contact_view")
+     * @Route("/contact-view/{lead_id}", name="contact_view")
      */
     public function contactView(
         Request $request,
-        LeadRepository $leadrepository,
+        LeadRepository $leadRepository,
         CategoryRepository $categoryRepository,
         NotificationsPathLeadsRepository $notificationsPathLeadsRepository,
         ClientLearnyboxService $clientLearnyboxService,
@@ -49,25 +50,33 @@ class CalendlyController extends AbstractController
         InfosCallService $infosCallService,
         CheckTaxNumberService $checkTaxService,
         NotificationPathService $notificationsPathService,
-        $uri,
-        $start_date,
-        $end_date
+        FindCalendlyInfos $findCalendlyInfos,
+        $lead_id
         ): Response {
 
+        $uri = [];
+        $contact_response = [];
+        $calls_response = [];
+        $block_call = true;
+        $NaN = false;
+
         $user = $this->getUser();
+        $lead = $leadRepository->findby(['id_contact' => $lead_id])[0];
         $client = $clientLearnyboxService->clientLearnybox();
-        $contact_response = $infosContactService->getInfosContact($uri, $user);
-        $calls_response = $infosCallService->getInfosCall($user, $start_date, $end_date);
-        $lead_number = $contact_response->{'collection'}[0]->{'questions_and_answers'}[0]->{'answer'};
-        $block_call = $checkTaxService->checkTaxNumber($lead_number);
+        $infos = $findCalendlyInfos->setUserInfos($user->getCalendlyToken());
+        $findUuid = $findCalendlyInfos->findUuid($lead->getEmail(), $infos, $user->getCalendlyToken());
+        if(isset($findUuid) && $findUuid !== false){
+            $uri = str_replace('https://api.calendly.com/scheduled_events/', '', $findUuid->{'uri'});
+            $contact_response = $infosContactService->getInfosContact($uri, $user);
+            $calls_response = $infosCallService->getInfosCall($user, $findUuid->{'start_time'}, $findUuid->{'end_time'});
+            $lead_number = $contact_response->{'collection'}[0]->{'questions_and_answers'}[0]->{'answer'};
+            $block_call = $checkTaxService->checkTaxNumber($lead_number);
 
-        $NaN = $checkTaxService->isNumber($block_call);
+            $NaN = $checkTaxService->isNumber($block_call);
+        }
+
         
-        $contact_email = $contact_response->{'collection'}[0]->{'email'};
 
-        $infos_contact = $leadrepository->findBy(['email' => $contact_email]);
-
-        $lead_id = $infos_contact[0]->getIdContact();
         $infos_api = $client->get('mail/contacts/' . $lead_id);
         $paid_state = $client->get('transactions/user/' . $lead_id);
 
@@ -85,9 +94,7 @@ class CalendlyController extends AbstractController
             $entityManager->flush();
 
             return $this->redirectToRoute('app_contact_view', [
-                'uri' => $uri,
-                'start_date' => $start_date,
-                'end_date' => $end_date
+                'lead_id' => $lead_id,
             ]);
         }
 
@@ -102,16 +109,14 @@ class CalendlyController extends AbstractController
             $notificationsPathService->setNotificationPath($notifications, 'Notes', 'Notes du rendez-vous', $form->getData()->getNotificationBody(), new \DateTimeImmutable('now'), $lead_id);
 
             return $this->redirectToRoute('app_contact_view', [
-                'uri' => $uri,
-                'start_date' => $start_date,
-                'end_date' => $end_date
+                'lead_id' => $lead_id
             ]);
         }
 
 
         $notifications_view = $notificationsPathLeadsRepository->findBy(['lead_id' => $lead_id], ['id' => 'DESC']);
 
-        if($calls_response !== null){
+        if($calls_response !== null && !empty($calls_response)){
             date_default_timezone_set('Europe/Paris');
             setlocale(LC_TIME, "fr_FR");
             $date_call = $calls_response->{'call_list'}[0]->{'start_time'};
@@ -125,8 +130,8 @@ class CalendlyController extends AbstractController
 
         return $this->render('calendly/contact-view.html.twig', [
             'contact_response' => $contact_response,
-            'infos_contact' => $infos_contact,
-            'email' => $contact_email,
+            'infos_contact' => $lead,
+            'email' => $lead->getEmail(),
             'infos' => $infos_api,
             'paid_state' => $paid_state,
             'lead_id' => $lead_id,
