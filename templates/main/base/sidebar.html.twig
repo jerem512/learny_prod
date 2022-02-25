@@ -50,6 +50,7 @@
                         <span class="ml-2">Mes rendez-vous</span>
                     </a>
                 </li>
+                {% if app.user.roles[0] == 'ROLE_ADMIN' %}
                 <li class=" sidebar-layout">
                     <a href="{{ path('app_contact_mail') }}" class="svg-icon">
                         <i class="">
@@ -60,6 +61,7 @@
                         <span class="ml-2">Contacts Mail</span>
                     </a>
                 </li>
+                {% endif %}
                 {#
                 <li class=" sidebar-layout">
                     <a href="../backend/invoice.html" class="svg-icon">
