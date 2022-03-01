@@ -64,7 +64,9 @@ class CalendlyController extends AbstractController
         $lead = $leadRepository->findby(['id_contact' => $lead_id])[0];
         $client = $clientLearnyboxService->clientLearnybox();
         $infos = $findCalendlyInfos->setUserInfos($user->getCalendlyToken());
+        
         $findUuid = $findCalendlyInfos->findUuid($lead->getEmail(), $infos, $user->getCalendlyToken());
+        //dd($findUuid);
         if(isset($findUuid) && $findUuid !== false){
             $uri = str_replace('https://api.calendly.com/scheduled_events/', '', $findUuid->{'uri'});
             $contact_response = $infosContactService->getInfosContact($uri, $user);
@@ -88,6 +90,7 @@ class CalendlyController extends AbstractController
         if ($form_category->isSubmitted() && $form_category->isValid()) {
 
             $category->setUserId($lead_id);
+            $category->setCloserId($user->getId());
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($category);

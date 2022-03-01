@@ -27,6 +27,11 @@ class Category
      */
     private $user_id;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $closer_id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,6 +57,18 @@ class Category
     public function setUserId(int $user_id): self
     {
         $this->user_id = $user_id;
+
+        return $this;
+    }
+
+    public function getCloserId(): ?int
+    {
+        return $this->closer_id;
+    }
+
+    public function setCloserId(int $closer_id): self
+    {
+        $this->closer_id = $closer_id;
 
         return $this;
     }

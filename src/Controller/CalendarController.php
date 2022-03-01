@@ -10,6 +10,8 @@ use App\Repository\ModelMailRepository;
 use App\Repository\NotificationsPathLeadsRepository;
 use App\Services\AccessTokenService;
 use App\Services\EventCalendarService;
+use App\Services\OneEventService;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,11 +31,12 @@ class CalendarController extends AbstractController
         $user = $this->getUser();
         $user_mail = $user->getEmail();
         $accessToken = $accessTokenService->accessToken($user);
+        $range_date = new DateTime('-120 day');
         
         $calendar = curl_init();
 
         curl_setopt_array($calendar, [
-            CURLOPT_URL => "https://www.googleapis.com/calendar/v3/calendars/" . $user_mail ."/events?maxResults=2500&orderBy=startTime&singleEvents=true",
+            CURLOPT_URL => "https://www.googleapis.com/calendar/v3/calendars/" . $user_mail ."/events?maxResults=2500&orderBy=startTime&singleEvents=true&timeMin=" . $range_date->format('Y-m-d') . 'T00:00:00Z',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -46,6 +49,7 @@ class CalendarController extends AbstractController
         ]);
 
         $events = json_decode(curl_exec($calendar));
+        //dd($events);
         $case = $eventCalendarService->makeEventCalendarService($events, $user_mail);
         $data = json_encode($case);
 
@@ -67,8 +71,6 @@ class CalendarController extends AbstractController
         $descriptionEvent = $request->request->get('descriptionEvent');
         $colorId = $request->request->get('colorId');
         $mailFup = $request->request->get('fupEvent');
-
-        //dd($mailFup);
 
         $accessToken = $accessTokenService->accessToken($user);
 
@@ -99,17 +101,20 @@ class CalendarController extends AbstractController
     /**
      * @Route("/one-event", name="one_event")
      */
-    public function event(Request $request, LeadRepository $leadRepository, NotificationsPathLeadsRepository $notificationsPathLeadsRepository, LeadMembershipRepository $leadMembershipRepository){
+    public function event(Request $request, LeadRepository $leadRepository, NotificationsPathLeadsRepository $notificationsPathLeadsRepository, LeadMembershipRepository $leadMembershipRepository, OneEventService $oneEventService){
 
 
         $user = $this->getUser();
+        $token = $user->getCalendlyToken();
+        $uuid = $user->getuuidCalendly();
         $mail = $request->request->get('email');
         $lead = $leadRepository->findby(['email' => $mail]);
         
         $lead_id = $lead[0]->getIdContact();
         $lead_name = $lead[0]->getFirstName();
         $date_call_immuable = new \DateTimeImmutable();
-        
+
+        $event = $oneEventService->getOneEvent($uuid, $token, $mail);
 
         if(!empty($notificationsPathLeadsRepository->findBy(['notification_type' => 'Appointment', 'lead_id' => $lead_id])) === false){
             $date = $event->{'collection'}[0]->{'start_time'};

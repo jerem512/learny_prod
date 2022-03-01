@@ -275,7 +275,13 @@
                                                     Type de lead
                                                 </p>
                                             </td>
-                                            {% if category_lead[0].leadCategory is defined and category_lead[0].leadCategory == 'INTERESTED' %}
+                                            {% if category_lead[0].leadCategory is defined and category_lead[0].leadCategory == 'NO_SHOW' %}
+                                                <td>
+                                                    <p class="mb-0 ">
+                                                        No show
+                                                    </p>
+                                                </td>
+                                            {% elseif category_lead[0].leadCategory is defined and category_lead[0].leadCategory == 'INTERESTED' %}
                                                 <td>
                                                     <p class="mb-0 ">
                                                         Touriste intéressant

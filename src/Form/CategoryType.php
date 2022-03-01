@@ -21,6 +21,7 @@ class CategoryType extends AbstractType
                     'class' => 'form-control mb-3'
                 ],
                 'choices' => array(
+                    'No show' => 'NO_SHOW',
                     'Touriste Intéréssant' => 'INTERESTED',
                     'Touriste total' => 'TOTAL',
                     'Touriste prix' => 'PRICE',

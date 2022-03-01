@@ -86,11 +86,14 @@ class EventCalendarService
             
             if(isset($event->{'attendees'})){
                 if($event->{'attendees'}[0]->{'email'} == $user_mail){
-                    $invitee = $event->{'attendees'}[1]->{'email'};
-                    if($event->{'attendees'}[1]->{'responseStatus'} == 'declined'){
-                        $color = '#FFFFFF';
-                        $borderColor = '#059be5';
-                        $textColor = '#059be5';
+                    if(isset($event->{'attendees'}[1]->{'email'})){
+                        $invitee = $event->{'attendees'}[1]->{'email'};
+
+                        if($event->{'attendees'}[1]->{'responseStatus'} == 'declined'){
+                            $color = '#FFFFFF';
+                            $borderColor = '#059be5';
+                            $textColor = '#059be5';
+                        }
                     }
                 }else{
                     $invitee = $event->{'attendees'}[0]->{'email'};

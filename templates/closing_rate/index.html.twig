@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello ClosingRateController!{% endblock %}
+
+{% block stylesheets %}
+    {{ encore_entry_link_tags('closingrate') }}
+{% endblock %}
+
+{% block body %}
+
+{% include 'main/base/sidebar.html.twig' %}
+{% include 'main/base/nav.html.twig' %}
+
+    <div class="content-page">
+        <div class="container-fluid">
+            <h1 class="text-center my-5">Remplir son closing rate</h1>
+            <div class="row w-100">
+
+                <div class="col-12">
+                    <!--Table-->
+                    <table class="table table-sm table-striped text-center p-0">
+
+                        <thead>
+                        <tr>
+                            <th colspan="1" class="separate">DATE</th>
+                            <th>FUP</th>
+                            <th>Show</th>
+                            <th>Back</th>
+                            <th class="separate">Close</th>
+                            <th>Leads</th>
+                            <th>Validés</th>
+                            <th>Contacts</th>
+                            <th>Offres</th>
+                            <th>FUP</th>
+                            <th>Closes</th>
+                            <th>Confirmés</th>
+                            <th>new</th>
+                        </tr>
+                        </thead>
+                        <tbody class="insert">
+                        
+                        </tbody>
+                        <tfoot>
+                            {{ form_start(ClosingRatesForm, { 'attr' : {'id' : 'closing_rate'}}) }}
+                            <tr class="no-padding">
+                                <!-- ************************************ formulaire d'ajout ******************************************-->
+                                <td class="separate">{{ form_row(ClosingRatesForm.date, {'attr' : {'class' : 'text-center'}}) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.fup) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.shofup) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.back) }}</td>
+                                <td class="separate">{{ form_row(ClosingRatesForm.closefup) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.leads) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.leads_valid) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.leads_contact) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.leads_offer) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.leads_fup) }}</td>
+                                <td>{{ form_row(ClosingRatesForm.leads_close) }}</td>
+                                <td class="separate">{{ form_row(ClosingRatesForm.leads_confirm) }}</td>
+                                <td class="add">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="align-middle" width="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </td>
+                            </tr>
+                            {{ form_end(ClosingRatesForm) }}
+                        </tfoot>
+                    </table>
+                    <!--Table-->
+                </div>
+
+            </div>  <!-- fin de row -->
+        </div>    
+
+    {% block javascripts %}
+        {{ encore_entry_script_tags('closingrate') }}
+    {% endblock %}
+{% endblock %}

@@ -134,10 +134,16 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $lead_id;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClosingRate::class, mappedBy="user_id", orphanRemoval="true")
+     */
+    private $closingRates_id;
+
     public function __construct()
     {
         $this->modelMails = new ArrayCollection();
         $this->lead_id = new ArrayCollection();
+        $this->closingRates_id = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -190,6 +196,36 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClosingRate[]
+     */
+    public function getClosingRatesId(): Collection
+    {
+        return $this->closingRates_id;
+    }
+
+    public function addClosingRatesId(ClosingRate $closingRatesId): self
+    {
+        if (!$this->closingRates_id->contains($closingRatesId)) {
+            $this->closingRates_id[] = $closingRatesId;
+            $closingRatesId->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClosingRatesId(ClosingRate $closingRatesId): self
+    {
+        if ($this->closingRates_id->removeElement($closingRatesId)) {
+            // set the owning side to null (unless already changed)
+            if ($closingRatesId->getUserId() === $this) {
+                $closingRatesId->setUserId(null);
+            }
+        }
 
         return $this;
     }

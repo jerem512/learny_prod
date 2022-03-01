@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 /**
- * @Route("/app", name="app_")
+ * @Route("/admin", name="admin_")
  */
 
 class ContactMailController extends AbstractController
