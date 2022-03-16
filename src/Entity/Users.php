@@ -139,6 +139,16 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $closingRates_id;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $api_key_learnybox;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $subdomain_learnybox;
+
     public function __construct()
     {
         $this->modelMails = new ArrayCollection();
@@ -537,5 +547,29 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function __toString()
     {
         return $this->getFirstName();
+    }
+
+    public function getApiKeyLearnybox(): ?string
+    {
+        return $this->api_key_learnybox;
+    }
+
+    public function setApiKeyLearnybox(?string $api_key_learnybox): self
+    {
+        $this->api_key_learnybox = $api_key_learnybox;
+
+        return $this;
+    }
+
+    public function getSubdomainLearnybox(): ?string
+    {
+        return $this->subdomain_learnybox;
+    }
+
+    public function setSubdomainLearnybox(string $subdomain_learnybox): self
+    {
+        $this->subdomain_learnybox = $subdomain_learnybox;
+
+        return $this;
     }
 }

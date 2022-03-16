@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %} 
+{% block title %}Créer un compte{% endblock %} 
+{% block body %}
+
+{% include 'main/base/sidebar.html.twig' %}
+{% include 'main/base/nav.html.twig' %}
+
+<div class="wrapper">
+
+    <section class="login-content">
+        <div class="container h-100">
+            <div class="row justify-content-center mt-5">
+                <div class="card col-3">
+                    <div class="text-center">
+                        <h3 class="">Récupérer l'Uuid :</h3>
+                        <p class="disable"><i class="fa fa-exclamation-triangle text-warning"></i> ️A faire avant d'inscrire le closer <i class="fa fa-exclamation-triangle text-warning"></i>️</p>
+                        <div class="form-group">
+                            <label for="token_uuid">Mettre le token du closer :</label>
+                            <textarea name="token_uuid" id="token_uuid" cols="30" rows="5"></textarea>
+                        </div>
+                        <button class="btn col-10 btn-primary" id="searchuuid"><a id="uuid" class="text-decoration-none text-white" href="#">Rechercher</a></button>
+                        <p class="mt-3">L'uuid à copier et à placer dans l'inscription : <span id="copy" class="text-danger"></span></p>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card p-3">
+                        <div class="card-body">
+                            <div class="auth-logo">
+                                <img src="https://da32ev14kd4yl.cloudfront.net/versioned/affiliation-ninja/affiliationninjacouloeur.png" class="img-fluid  rounded-normal  darkmode-logo" alt="logo">
+                                <img src="https://da32ev14kd4yl.cloudfront.net/versioned/affiliation-ninja/affiliationninjacouloeur.png" class="img-fluid rounded-normal light-logo" alt="logo">
+                            </div>
+                            <h3 class="mb-3 font-weight-bold text-center">Inscription d'un membre</h3>
+                            <p class="text-center text-secondary mb-4">Remplissez les champs pour inscrire le membre que vous souhaitez</p>
+                            <div class="mb-5">
+                                <p class="line-around text-secondary mb-0"></p>
+                            </div>
+                            {{ form_start(registrationForm) }}
+                            <div class="row">
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Nom</label> 
+                                        {{ form_row(registrationForm.last_name) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Prénom</label> {{ form_row(registrationForm.first_name) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Email</label> {{ form_row(registrationForm.email) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Mot de passe</label> {{ form_row(registrationForm.password.first) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Confirmation</label> {{ form_row(registrationForm.password.second) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Rôles</label> {{ form_row(registrationForm.roles) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Numéro Ringover</label> {{ form_row(registrationForm.ringover_phone_number) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Token Calendly</label> {{ form_row(registrationForm.calendly_token) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Uuid Calendly</label> {{ form_row(registrationForm.uuid_calendly) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Token Docusign</label> {{ form_row(registrationForm.learnybox_token) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="text-secondary">Token Ringover</label> {{ form_row(registrationForm.ringover_token) }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <div class="form-check form-check-inline">
+                                        <div class="custom-control custom-checkbox custom-control-inline mb-3">
+
+                                            <label class="custom-control-label pl-2" for="inlineCheckbox1">Je suis sûr des informations ci-dessus</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block mt-2">Créer le compte</button> {{ form_end(registrationForm) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+.null {
+    background: rgba(134, 133, 133, 0.2);
+    cursor: default !important;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover:not(.null) {
+    background: rgba(134, 133, 133, 0.1);
+}

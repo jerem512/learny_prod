@@ -32,7 +32,7 @@ class FindCalendlyInfos
         $init = curl_init();
 
         curl_setopt_array($init, [
-            CURLOPT_URL => "https://api.calendly.com/scheduled_events?user=" . $infos->resource->{'uri'}  ."&invitee_email=" . $email . "&organization=" . $infos->resource->{'current_organization'},
+            CURLOPT_URL => "https://api.calendly.com/scheduled_events?invitee_email=" . $email . "&organization=" . $infos->resource->{'current_organization'},
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,

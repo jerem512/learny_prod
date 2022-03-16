@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="robots" content="noindex">
     <meta name="googlebot" content="noindex">
+    <script src="https://kit.fontawesome.com/b9c9410236.js" crossorigin="anonymous"></script>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/logo_mediaffiliate.jpeg') }}">
     <title>
         {% block title %}{% endblock %}
     </title>
-
+    
     <link rel="stylesheet" href="{{ asset('css/backend-plugin.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/backend.css?v=1.0.0') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.1.0/css/v4-shims.min.css" integrity="sha512-p++g4gkFY8DBqLItjIfuKJPFvTPqcg2FzOns2BNaltwoCOrXMqRIOqgWqWEvuqsj/3aVdgoEo2Y7X6SomTfUPA==" crossorigin="anonymous" referrerpolicy="no-referrer"
-    /> {% block stylesheets %}{% endblock %}
+    {% block stylesheets %}{% endblock %}
 </head>
 
 <body class="sidebar-main">
@@ -41,7 +41,6 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
-
     <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
     {% block javascripts %}
 

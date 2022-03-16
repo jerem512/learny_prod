@@ -49,7 +49,6 @@ class CalendarController extends AbstractController
         ]);
 
         $events = json_decode(curl_exec($calendar));
-        //dd($events);
         $case = $eventCalendarService->makeEventCalendarService($events, $user_mail);
         $data = json_encode($case);
 
@@ -108,6 +107,7 @@ class CalendarController extends AbstractController
         $token = $user->getCalendlyToken();
         $uuid = $user->getuuidCalendly();
         $mail = $request->request->get('email');
+        //dd($mail);
         $lead = $leadRepository->findby(['email' => $mail]);
         
         $lead_id = $lead[0]->getIdContact();

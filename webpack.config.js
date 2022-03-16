@@ -28,6 +28,8 @@ Encore
     .addEntry('contact', './assets/js/contact.js')
     .addEntry('closingrate', './assets/js/closingrate.js')
     .addEntry('chart-closing', './assets/js/chart-closing.js')
+    .addEntry('account-login', './assets/js/account-login.js')
+    .addEntry('users_me', './assets/js/users_me.js')
 
 // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
 .enableStimulusBridge('./assets/controllers.json')

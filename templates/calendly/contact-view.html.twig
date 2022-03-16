@@ -10,7 +10,7 @@
 
         {% include 'main/base/sidebar.html.twig' %}
         {% include 'main/base/nav.html.twig' %}
-        
+
         <div class="content-page">
             <div class="container-fluid">
                 <div class="row">
@@ -335,8 +335,20 @@
                                                         Closé
                                                     </p>
                                                 </td>
-                                            {% endif %}
+                                            {% endif %}  
                                         </tr>
+                                        {% if isClosed is defined %}
+                                            <tr>
+                                                <td>
+                                                    <p class="mb-0 text-muted">
+                                                        Close
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    {{ isClosed[0].name|default }}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                     </table>
                                 </li>
                             </ul>
@@ -369,6 +381,40 @@
                                                     </span>
                                                 </button>
                                                 {{ form_end(category_form) }}
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                        {% if category_lead[0] is defined and category_lead[0].leadCategory == 'CLOSED' %}
+                            <div class="card">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <div>
+                                            <ul class="list-style-1 mb-0">
+                                                <li class="list-item d-flex justify-content-start align-items-center">
+                                                    <div class="list-style-detail mr-2">
+                                                        <h5 class="font-weight-bold">
+                                                            Choix du type de close
+                                                        </h5>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-12 text-center mb-2">
+                                                {{ form_start(close_form) }}
+                                                {{ form_row(close_form.name) }}
+                                                <button class="btn btn-block btn-sm btn-primary">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" width="20" fill="none" viewBox="0 0 30 30" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    <span class="">
+                                                        Enregistrer
+                                                    </span>
+                                                </button>
+                                                {{ form_end(close_form) }}
                                             </div>
                                         </div>
                                     </li>

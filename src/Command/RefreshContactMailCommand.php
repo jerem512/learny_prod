@@ -9,6 +9,7 @@ use App\Services\saveLeadService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Security\Core\Security;
 
 class RefreshContactMailCommand extends Command
 {
@@ -17,6 +18,7 @@ class RefreshContactMailCommand extends Command
     private $saveLeadService;
     private $clientLearnyboxService;
 
+
     protected static $defaultName = 'app:refresh-contact';
 
     public function __construct(LeadRepository $leadRepository, saveLeadService $saveLeadService, ClientLearnyboxService $clientLearnyboxService)
@@ -24,14 +26,16 @@ class RefreshContactMailCommand extends Command
         $this->leadRepository = $leadRepository;
         $this->saveLeadService = $saveLeadService;
         $this->clientLearnyboxService = $clientLearnyboxService;
-
         parent::__construct();
     }
 
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $client = $this->clientLearnyboxService->clientLearnybox();
+        $subdomain = 'affiliation-ninja';
+        $apiKey = 'syEgqafrk_tCeFA_mDrwAbxAzxFDth_sy';
+        
+        $client = $this->clientLearnyboxService->clientLearnybox($subdomain, $apiKey);
 
         $total = $client->get('mail/contacts')->{'total'};
         $count = $this->leadRepository->countLead();

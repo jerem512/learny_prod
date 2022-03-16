@@ -7,21 +7,25 @@ use App\Entity\Category;
 use App\Entity\Mail;
 use App\Entity\NotificationsPathLeads;
 use App\Entity\Notifs;
+use App\Entity\Close;
 use App\Form\CategoryType;
 use App\Form\LeadMembershipFormType;
 use App\Form\NotificationsPathLeadsType;
 use App\Form\MailType;
+use App\Form\CloseType;
 use App\Repository\CategoryRepository;
 use App\Repository\LeadMembershipRepository;
 use App\Repository\LeadRepository;
 use App\Repository\ModelMailRepository;
 use App\Repository\NotificationsPathLeadsRepository;
+use App\Repository\CloseRepository;
 use App\Services\CheckTaxNumberService;
 use App\Services\ClientLearnyboxService;
 use App\Services\FindCalendlyInfos;
 use App\Services\InfosCallService;
 use App\Services\InfosContactService;
 use App\Services\NotificationPathService;
+use App\Services\CheckOfferService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,6 +55,8 @@ class CalendlyController extends AbstractController
         CheckTaxNumberService $checkTaxService,
         NotificationPathService $notificationsPathService,
         FindCalendlyInfos $findCalendlyInfos,
+        CheckOfferService $checkOfferService,
+        CloseRepository $closeRepository,
         $lead_id
         ): Response {
 
@@ -62,12 +68,14 @@ class CalendlyController extends AbstractController
 
         $user = $this->getUser();
         $lead = $leadRepository->findby(['id_contact' => $lead_id])[0];
-        $client = $clientLearnyboxService->clientLearnybox();
+        $client = $clientLearnyboxService->clientLearnybox($user->getSubdomainLearnybox(), $user->getApiKeyLearnybox());
         $infos = $findCalendlyInfos->setUserInfos($user->getCalendlyToken());
+        $isClosed = $closeRepository->findBy(['lead_id' => $lead_id]);
         
         $findUuid = $findCalendlyInfos->findUuid($lead->getEmail(), $infos, $user->getCalendlyToken());
-        //dd($findUuid);
+        
         if(isset($findUuid) && $findUuid !== false){
+            
             $uri = str_replace('https://api.calendly.com/scheduled_events/', '', $findUuid->{'uri'});
             $contact_response = $infosContactService->getInfosContact($uri, $user);
             $calls_response = $infosCallService->getInfosCall($user, $findUuid->{'start_time'}, $findUuid->{'end_time'});
@@ -77,7 +85,23 @@ class CalendlyController extends AbstractController
             $NaN = $checkTaxService->isNumber($block_call);
         }
 
-        
+        $close = new Close();
+        $form_close = $this->createForm(CloseType::class, $close);
+        $form_close->handleRequest($request);
+
+        if($form_close->isSubmitted() && $form_close->isValid()){
+            $name = $form_close->getData()->getName();
+
+            $offer = $checkOfferService->checkOffer($name);
+
+            $close->setLeadId($lead_id);
+            $close->setUserId($user->getId());
+            $close->setOfferId($offer->getId());
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($close);
+            $entityManager->flush();
+        }
 
         $infos_api = $client->get('mail/contacts/' . $lead_id);
         $paid_state = $client->get('transactions/user/' . $lead_id);
@@ -116,7 +140,6 @@ class CalendlyController extends AbstractController
             ]);
         }
 
-
         $notifications_view = $notificationsPathLeadsRepository->findBy(['lead_id' => $lead_id], ['id' => 'DESC']);
 
         if($calls_response !== null && !empty($calls_response)){
@@ -142,10 +165,12 @@ class CalendlyController extends AbstractController
             'notification_form' => $form->createView(),
             'notification_view' => $notifications_view,
             'category_form' => $form_category->createView(),
+            'close_form' => $form_close->createView(),
             'category_lead' => $lead_category,
             'block_call' => $block_call,
             'NaN' => $NaN,
-            'uri' => $uri
+            'uri' => $uri,
+            'isClosed' => $isClosed
         ]);
     }
 

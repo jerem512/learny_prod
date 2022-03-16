@@ -32,7 +32,7 @@ class ClosingRateController extends AbstractController
         $form->handleRequest($request);
 
         if (isset($action) && !empty($action) && $action == 'show' && $request->isXmlHttpRequest()) {
-            $data = $closingRateRepository->findBy(['user_id' => $user_id]);
+            $data = $closingRateRepository->findBy(['user_id' => $user_id],['date' => 'ASC']);
             return new JsonResponse($data);;
         }
 
@@ -102,5 +102,26 @@ class ClosingRateController extends AbstractController
             return new JsonResponse($items);
 
         }
+        
+    }
+
+
+    /**
+    * @Route("/delete_closingrate", name="delete_closingrate")
+    */
+    public function delete(Request $request, ClosingRateRepository $closingRateRepository, EntityManagerInterface $em)
+    {
+        $user_id = $this->getUser();
+        $lign_id = $request->request->get('lign_id');
+
+        $closingrate_lign = $closingRateRepository->findBy(['id' => $lign_id]);
+        
+        $em->remove($closingrate_lign[0]);
+        $em->flush();
+
+        $count = count($closingRateRepository->findBy(['user_id' => $user_id]));
+
+        return new JsonResponse($count);
+
     }
 }

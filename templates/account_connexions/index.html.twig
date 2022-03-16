@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+{% block title %}
+	Dashboard |
+	{{ app.user.firstname }}
+{% endblock %}
+{% block stylesheets %}
+    {{ encore_entry_link_tags('account-login') }}
+{% endblock %}
+{% block body %}
+	{% include 'main/base/sidebar.html.twig' %}
+	{% include 'main/base/nav.html.twig' %}
+    
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-6 col-md-6 col-lg-4">
+                    <div id="calendly" class="card {% if token_calendly is not null and uuid_calendly is not null %}border border-success{% endif %}">
+                    <img src="{{ asset('images/Calendly.png') }}" class="card-img-top" alt="#">
+                        {% if token_calendly is not null and uuid_calendly is not null %}
+                        <div class="card-body">
+                            <h4 class="card-title text-success">Calendly <i class="fas fa-check text-success"></i></h4>
+                            <p class="text-success">Calendly est connecté.</p>
+                        </div>
+                        {% else %}
+                        <div id="calendly_card" class="card-body">
+                            <h4 class="card-title">Calendly</h4>
+                            <div id="echec" class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">
+                                    <i class="fas fa-code"></i>
+                                </span>
+                                </div>
+                                <input id="calendly_token" type="text" class="form-control" placeholder="Token Calendly" aria-label="Username" aria-describedby="basic-addon1">
+                            </div>
+                            <input id="input_calendly" type="button" class="btn btn-primary" value="Ajouter">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-6 col-lg-4">
+                    <div id="learnybox" class="card {% if api_key_learnybox is not null and subdomain_learnybox is not null %}border border-success{% endif %}">
+                        <img src="{{ asset('images/Learnybox.png') }}" class="card-img-top" alt="#">
+                        {% if api_key_learnybox is not null and subdomain_learnybox is not null %}
+                            <div class="card-body">
+                                <h4 class="card-title text-success">Learnybox <i class="fas fa-check text-success"></i></h4>
+                                <p class="text-success">Learnybox est connecté.</p>
+                            </div>
+                        {% else %}
+                            <div id="learnybox_card" class="card-body">
+                                <h4 class="card-title">Learnybox</h4>
+                                <div id="echec_learnybox" class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <i class="fas fa-network-wired"></i>
+                                    </span>
+                                    </div>
+                                    <input id="subdomain_learnybox" type="text" class="form-control" placeholder="Subdomain Learnybox" aria-label="Subdomain" aria-describedby="basic-addon1">
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon2">
+                                        <i class="fas fa-code"></i>
+                                    </span>
+                                    </div>
+                                    <input id="api_key_learnybox" type="input" class="form-control" placeholder="API key" aria-label="API_key" aria-describedby="basic-addon2">
+                                </div>
+                                <input id="input_learnybox" type="button" class="btn btn-primary" value="Ajouter">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>    
+        </div>
+    </div>
+
+    {{ encore_entry_script_tags('account-login') }}
+    
+{% endblock %}

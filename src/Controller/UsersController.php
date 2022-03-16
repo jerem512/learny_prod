@@ -4,13 +4,18 @@ namespace App\Controller;
 
 use App\Entity\Images;
 use App\Entity\ModelMail;
+use App\Entity\Objectives;
 use App\Form\ChangeContactType;
 use App\Form\ChangePasswordType;
 use App\Form\ChangePersonnalDataType;
 use App\Form\ModelMailType;
 use App\Repository\ModelMailRepository;
+use App\Repository\CloseRepository;
+use App\Repository\ObjectivesRepository;
+use App\Services\CheckOfferService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -27,10 +32,53 @@ class UsersController extends AbstractController
     /**
      * @Route("/me", name="me")
      */
-    public function index(): Response
+    public function index(CloseRepository $closeRepository, CheckOfferService $checkOfferService, Request $request, ObjectivesRepository $objectivesRepository, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        $salary = [];
+        $goals = $objectivesRepository->findOneBy(['user_id' => $user]);
+        
+        $goals_week = $goals->getGoalWeek();
+        $goals_month = $goals->getGoalMonth();
+        $goals_year = $goals->getGoalYear();
+        $sales = $closeRepository->findBy(['user_id' => $user->getId()]);
+        $action = $request->request->get('action');
 
-        return $this->render('users/index.html.twig');
+        foreach($sales as $sale){
+            $offer = $checkOfferService->checkOffer($sale->getName());
+            $salary[] = $offer->getCommission();
+        }
+        
+        $target_week = (array_sum($salary) / $goals_week * 100) < 100 ? (array_sum($salary) / $goals_week * 100) : 100;
+        $target_month = (array_sum($salary) / $goals_month * 100) < 100 ? (array_sum($salary) / $goals_month * 100) : 100;
+        $target_year = (array_sum($salary) / $goals_year * 100) < 100 ? (array_sum($salary) / $goals_year * 100) : 100;
+
+        if(isset($action) && !empty($action) && $action == 'data'){
+            if(isset($goals) && !empty($goals)){
+                $goals->setGoalWeek($request->request->get('rangeWeek'));
+                $goals->setGoalMonth($request->request->get('rangeMonth'));
+                $goals->setGoalYear($request->request->get('rangeYear'));
+                $entityManager->persist($goals);
+                $entityManager->flush();
+
+                return new JsonResponse('done', 200);
+            }else{
+                $no_goals = new Objectives();
+                $no_goals->setGoalWeek(500);
+                $no_goals->setGoalMonth(2000);
+                $no_goals->setGoalYear(24000);
+            }
+        }
+
+
+        return $this->render('users/index.html.twig', [
+            'goals_week' => $goals_week,
+            'goals_month' => $goals_month,
+            'goals_year' => $goals_year,
+            'target_week' => \round($target_week, 2),
+            'target_month' => \round($target_month, 0),
+            'target_year' => round($target_year, 0)
+        ]);
     }
 
     /**
@@ -82,9 +130,10 @@ class UsersController extends AbstractController
                 $image = $form_personnal_info->get('image')->getData();
                 if ($image->guessExtension() == 'jpg' || $image->guessExtension() == "jpeg") {
                     $file = $users->getFirstName() . '.' . $image->guessExtension();
+                    //dd($file);
                     $img = new Images();
                     $img->setName($file);
-
+                    
                     if (file_exists($this->getParameter('image_directory') . '/' . $file)) {
                         unlink($this->getParameter('image_directory') . '/' . $file);
                         $entityManager->remove($users->getImages());

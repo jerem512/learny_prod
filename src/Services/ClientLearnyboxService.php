@@ -7,11 +7,11 @@ use LearnyBox\Client;
 class ClientLearnyboxService
 {
 
-    public function clientLearnybox()
+    public function clientLearnybox($subdomain, $api_key)
     {
         $client = Client::create([
-            'api_key' => 'fdatfECqdfkGcjirnCBsmujGpgGvqFkDb',
-            'subdomain' => 'affiliation-ninja',
+            'api_key' => $api_key,
+            'subdomain' => $subdomain,
             'timeout' => 3000,
         ]);
 
