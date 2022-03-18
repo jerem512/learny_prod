@@ -19,6 +19,15 @@ class ClosingRateRepository extends ServiceEntityRepository
         parent::__construct($registry, ClosingRate::class);
     }
 
+    public function drop_table($id_lign){
+
+        $entityManager = $this->getEntityManager();
+        $qb = $entityManager->createQuery('DELETE FROM App\Entity\ClosingRate c WHERE c.id = :id')
+        ->setParameter('id', $id_lign);
+
+        return $qb->getResult();
+    }
+
     // /**
     //  * @return ClosingRate[] Returns an array of ClosingRate objects
     //  */

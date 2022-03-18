@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
+use App\Repository\ClosingRateBackupRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=ClosingRateRepository::class)
- * @ORM\Table(name="`closing_rate`")
+ * @ORM\Entity(repositoryClass=ClosingRateBackupRepository::class)
  */
-class ClosingRate
+class ClosingRateBackup
 {
     /**
      * @ORM\Id
@@ -248,5 +248,4 @@ class ClosingRate
     {
         $this->date = new \DateTime('now');
     }
-
 }
