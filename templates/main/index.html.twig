@@ -353,8 +353,7 @@
 					<div class="card">
 						<div class="card-header d-flex justify-content-between">
 							<div class="header-title">
-								<h4 class="card-title">Mes derniers closes (à venir)</h4>
-								<small class="text-danger">Ce sont de fausses données.</small>
+								<h4 class="card-title">Mes derniers closes</h4>
 							</div>
 						</div>
 						<div class="card-body p-0">
@@ -369,80 +368,40 @@
 										</tr>
 									</thead>
 									<tbody>
-										<tr class="white-space-no-wrap">
-											<td>01 Jun 2020</td>
-											<td>
+										{% for last_close in last_closes %}
+											<tr class="white-space-no-wrap{% if last_close.status == false %} text-danger{% endif %} clickable-row {{ last_close.lead_id }}">
+												<td>{{ last_close.date }}</td>
+												<td>
 												<div class="d-flex align-items-center">
-													<div>Maggie Potts</div>
-												</div>
-											</td>
-											<td>
-												<p class="mb-0 text-success d-flex justify-content-start align-items-center">
-													<small>
-														<svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="18" viewbox="0 0 24 24" fill="none">
-															<circle cx="12" cy="12" r="8" fill="#3cb72c"></circle>
-														</svg>
-													</small>
-													Completed
-												</p>
-											</td>
-											<td class="text-right">$104.98</td>
-										</tr>
-										<tr class="white-space-no-wrap">
-											<td>02 Jun 2020</td>
-											<td>
-												<div class="d-flex align-items-center"
-													<div>Kevin Adkins</div>
-												</div>
-											</td>
-											<td>
-												<p class="mb-0 text-success d-flex justify-content-start align-items-center">
-													<small>
-														<svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="18" viewbox="0 0 24 24" fill="none">
-															<circle cx="12" cy="12" r="8" fill="#3cb72c"></circle>
-														</svg>
-													</small>
-													Completed
-												</p>
-											</td>
-											<td class="text-right">$233.00</td>
-										</tr>
-										<tr class="white-space-no-wrap">
-											<td>05 Jun 2020</td>
-											<td>
-												<div class="d-flex align-items-center">
-													<div>Max Lynn</div>
-												</div>
-											</td>
-											<td>
-												<p class="mb-0 text-warning d-flex justify-content-start align-items-center">
-													<small>
-														<svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="18" viewbox="0 0 24 24" fill="none">
-															<circle cx="12" cy="12" r="8" fill="#db7e06"></circle>
-														</svg>
-													</small>Pending
-												</p>
-											</td>
-											<td class="text-right">$150.01</td>
-										</tr>
-										<tr class="white-space-no-wrap">
-											<td>06 Jun 2020</td>
-											<td>
-												<div class="d-flex align-items-center">
-													<div>Danniw Yatt</div>
-												</div>
-											</td>
-											<td>
-												<p class="mb-0 text-danger d-flex justify-content-start align-items-center">
-													<small>
-														<svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="18" viewbox="0 0 24 24" fill="none">
-															<circle cx="12" cy="12" r="8" fill="#F42B3D"></circle>
-														</svg>
-													</small>Cancelled
-												</p>
-											</td>
-											<td class="text-right">$199.99</td>
-										</tr>
+														<div>{{ last_close.last_name }} {{ last_close.first_name }}</div>
+													</div>
+												</td>
+												{% if last_close.status == true %}
+												<td>
+													<p class="mb-0 text-success d-flex justify-content-start align-items-center">
+														<small>
+															<svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="18" viewbox="0 0 24 24" fill="none">
+																<circle cx="12" cy="12" r="8" fill="#3cb72c"></circle>
+															</svg>
+														</small>
+														Paiement validé
+													</p>
+												</td>
+												{% else %}
+												<td>
+													<p class="mb-0 text-danger d-flex justify-content-start align-items-center">
+														<small>
+															<svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="18" viewbox="0 0 24 24" fill="none">
+																<circle cx="12" cy="12" r="8" fill="#FF0000"></circle>
+															</svg>
+														</small>
+														Paiement refusé
+													</p>
+												</td>
+												{% endif %}
+												<td class="text-right">{{ last_close.price_com }}€</td>
+											</tr>
+										{% endfor %}
 									</tbody>
 								</table>
 								<div class="d-flex justify-content-end align-items-center border-top-table p-3">

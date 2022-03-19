@@ -37,6 +37,11 @@ class Close
      */
     private $lead_id;
 
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $date;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -86,6 +91,18 @@ class Close
     public function setLeadId(int $lead_id): self
     {
         $this->lead_id = $lead_id;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeImmutable
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeImmutable $date): self
+    {
+        $this->date = $date;
 
         return $this;
     }

@@ -46,11 +46,13 @@ class ContactMailController extends AbstractController
     public function contactToContactView(FindCalendlyInfos $findCalendlyInfos, Request $request, LeadRepository $leadRepository){
 
         $email = $request->query->get('email');
+        $admin = $request->query->get('admin');
 
         $lead = $leadRepository->findBy(['email' => $email])[0];
         
         return $this->redirectToRoute('app_contact_view', [
-            'lead_id' => $lead->getIdContact()
+            'lead_id' => $lead->getIdContact(),
+            'admin' => $admin
         ]);
     }
 

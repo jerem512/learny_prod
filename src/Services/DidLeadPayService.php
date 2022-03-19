@@ -21,6 +21,17 @@ class DidLeadPayService
         $payment = !empty($getPayment) && $getPayment[0]->{'valid'} == true ? $getPayment[0] : false;
 
         return $payment;
+    }
+
+    public function getPaymentInfos($subdomain, $apiKey, $lead_id){
+
+        $client = $this->clientLearnyboxService->clientLearnybox($subdomain, $apiKey);
+
+        $getPayment = $client->get('transactions/user/' . $lead_id . '/')->{'data'};
+
+        $payment = !empty($getPayment) && $getPayment[0]->{'valid'} == true ? $getPayment[0] : false;
+
+        return $payment;
 
     }
 }

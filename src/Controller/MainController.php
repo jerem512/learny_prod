@@ -58,6 +58,7 @@ class MainController extends AbstractController
         $events = $account_connected === true ? $fiveEventsService->fiveEvents($user) : false;
         $events_infos = $account_connected === true ? $fiveEventsService->fiveEventsInfos($user, $events) : false;
         $objectives = $objectivesRepository->findOneBy(['user_id' => $user]);
+        $last_closes = $closeRepository->findby(['user_id' => $user_id], ['id' => 'ASC'], 4);
 
         $close = [];
 
@@ -86,16 +87,26 @@ class MainController extends AbstractController
             ];
         }
 
-        $fup = [];
-
         $leads = [];
         $leads_valid = [];
         $leads_close = [];
 
         foreach ($datas as $data) {
-            $leads[] = $data->getLeads();
-            $leads_valid[] = $data->getLeadsValid();
             $leads_close[] = $data->getLeadsClose();
+        }
+
+        $last_closes_infos = [];
+
+        foreach($last_closes as $last_close){
+            $infos_payment = $didLeadPayService->getPaymentInfos($user->getSubdomainLearnybox(), $user->getApiKeyLearnybox(), $last_close->getLeadId());
+            $last_closes_infos[] = [
+                'date' => $last_close->getDate()->format('d M Y'),
+                'last_name' => $infos_payment !== false ? $infos_payment->{'nom'} : 'Introuvable',
+                'first_name' => $infos_payment !== false ? $infos_payment->{'prenom'} : '',
+                'status' => $infos_payment !== false ? $infos_payment->{'valid'} : false,
+                'price_com' => $infos_payment !== false ? $infos_payment->{'montant_ht'} : '0.00',
+                'lead_id' => $last_close->getLeadId()
+            ];
         }
 
         $items = [
@@ -119,6 +130,7 @@ class MainController extends AbstractController
             'percent_year' => $percent_year,
             'events' => $events_infos,
             'account_connected' => $account_connected,
+            'last_closes' => $last_closes_infos
         ]);
     }
 }

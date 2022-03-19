@@ -2,37 +2,39 @@
 
 namespace App\Controller;
 
-use App\Entity\Users;
 use App\Entity\Category;
+use App\Entity\Close;
 use App\Entity\Mail;
 use App\Entity\NotificationsPathLeads;
 use App\Entity\Notifs;
-use App\Entity\Close;
+use App\Entity\Users;
 use App\Form\CategoryType;
-use App\Form\LeadMembershipFormType;
-use App\Form\NotificationsPathLeadsType;
-use App\Form\MailType;
 use App\Form\CloseType;
+use App\Form\LeadMembershipFormType;
+use App\Form\MailType;
+use App\Form\NotificationsPathLeadsType;
 use App\Repository\CategoryRepository;
+use App\Repository\CloseRepository;
 use App\Repository\LeadMembershipRepository;
 use App\Repository\LeadRepository;
 use App\Repository\ModelMailRepository;
 use App\Repository\NotificationsPathLeadsRepository;
-use App\Repository\CloseRepository;
+use App\Services\CheckOfferService;
 use App\Services\CheckTaxNumberService;
 use App\Services\ClientLearnyboxService;
 use App\Services\FindCalendlyInfos;
 use App\Services\InfosCallService;
 use App\Services\InfosContactService;
 use App\Services\NotificationPathService;
-use App\Services\CheckOfferService;
+use DateTime;
+use DateTimeImmutable;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/app", name="app_")
@@ -58,8 +60,9 @@ class CalendlyController extends AbstractController
         CheckOfferService $checkOfferService,
         CloseRepository $closeRepository,
         $lead_id
-        ): Response {
+    ): Response {
 
+        
         $uri = [];
         $contact_response = [];
         $calls_response = [];
@@ -71,11 +74,11 @@ class CalendlyController extends AbstractController
         $client = $clientLearnyboxService->clientLearnybox($user->getSubdomainLearnybox(), $user->getApiKeyLearnybox());
         $infos = $findCalendlyInfos->setUserInfos($user->getCalendlyToken());
         $isClosed = $closeRepository->findBy(['lead_id' => $lead_id]);
-        
-        $findUuid = $findCalendlyInfos->findUuid($lead->getEmail(), $infos, $user->getCalendlyToken());
-        
-        if(isset($findUuid) && $findUuid !== false){
-            
+
+        $findUuid = $findCalendlyInfos->findUuid($lead->getEmail(), $infos, $user->getCalendlyToken(), $request);
+
+        if (isset($findUuid) && $findUuid !== false) {
+
             $uri = str_replace('https://api.calendly.com/scheduled_events/', '', $findUuid->{'uri'});
             $contact_response = $infosContactService->getInfosContact($uri, $user);
             $calls_response = $infosCallService->getInfosCall($user, $findUuid->{'start_time'}, $findUuid->{'end_time'});
@@ -89,7 +92,11 @@ class CalendlyController extends AbstractController
         $form_close = $this->createForm(CloseType::class, $close);
         $form_close->handleRequest($request);
 
-        if($form_close->isSubmitted() && $form_close->isValid()){
+        if ($form_close->isSubmitted() && $form_close->isValid()) {
+            date_default_timezone_set('Europe/Paris');
+            setlocale(LC_TIME, "fr_FR");
+            $date = new DateTimeImmutable();
+
             $name = $form_close->getData()->getName();
 
             $offer = $checkOfferService->checkOffer($name);
@@ -97,6 +104,8 @@ class CalendlyController extends AbstractController
             $close->setLeadId($lead_id);
             $close->setUserId($user->getId());
             $close->setOfferId($offer->getId());
+            $close->setDate($date);
+
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($close);
@@ -136,20 +145,20 @@ class CalendlyController extends AbstractController
             $notificationsPathService->setNotificationPath($notifications, 'Notes', 'Notes du rendez-vous', $form->getData()->getNotificationBody(), new \DateTimeImmutable('now'), $lead_id);
 
             return $this->redirectToRoute('app_contact_view', [
-                'lead_id' => $lead_id
+                'lead_id' => $lead_id,
             ]);
         }
 
         $notifications_view = $notificationsPathLeadsRepository->findBy(['lead_id' => $lead_id], ['id' => 'DESC']);
 
-        if($calls_response !== null && !empty($calls_response)){
+        if ($calls_response !== null && !empty($calls_response)) {
             date_default_timezone_set('Europe/Paris');
             setlocale(LC_TIME, "fr_FR");
             $date_call = $calls_response->{'call_list'}[0]->{'start_time'};
             $date_call_immuable = new \DateTimeImmutable($date_call);
             $date_call_fr = strftime("%A %d %B %G à %H:%M", strtotime($date_call));
 
-            if(!empty($notificationsPathLeadsRepository->findBy(['notification_type' => 'Call', 'lead_id' => $lead_id])) === false){
+            if (!empty($notificationsPathLeadsRepository->findBy(['notification_type' => 'Call', 'lead_id' => $lead_id])) === false) {
                 $notificationsPathService->setNotificationPath($notifications, 'Call', 'Début de l\'appel', 'Votre appel a débuté le ' . $date_call_fr, $date_call_immuable, $lead_id);
             }
         }
@@ -170,7 +179,7 @@ class CalendlyController extends AbstractController
             'block_call' => $block_call,
             'NaN' => $NaN,
             'uri' => $uri,
-            'isClosed' => $isClosed
+            'isClosed' => $isClosed,
         ]);
     }
 
@@ -206,7 +215,8 @@ class CalendlyController extends AbstractController
     /**
      * @Route("/send_mail/{id}/{lead_id}", name="send_mail")
      */
-    public function sendMail(Request $request, MailerInterface $mailer, ClientLearnyboxService $clientLearnyboxService, NotificationPathService $notificationsPathService, Users $users, ModelMailRepository $modelMailRepository,$id, $lead_id) {
+    public function sendMail(Request $request, MailerInterface $mailer, ClientLearnyboxService $clientLearnyboxService, NotificationPathService $notificationsPathService, Users $users, ModelMailRepository $modelMailRepository, $id, $lead_id)
+    {
 
         $client = $clientLearnyboxService->clientLearnybox();
 
@@ -216,35 +226,35 @@ class CalendlyController extends AbstractController
         $name = $client->get('users/' . $lead_id)->{'data'}->{'fname'};
 
         $form = $this->createForm(MailType::class, $mail);
-        $form->handleRequest($request); 
- 
+        $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            
+
             $sender = $users->getEmail();
             $recipient = $client->get('users/' . $lead_id)->{'data'}->{'email'};
             $message = $mail->getBodyMail();
-            
-            if($request->request->get('mail_type') == 'Premiumx1' || 
-            $request->request->get('mail_type') == 'Premiumx2' ||
-            $request->request->get('mail_type') == 'Premiumx3' ||
-            $request->request->get('mail_type') == 'Premiumx6' ||
-            $request->request->get('mail_type') == 'Premiumx12'){
+
+            if ($request->request->get('mail_type') == 'Premiumx1' ||
+                $request->request->get('mail_type') == 'Premiumx2' ||
+                $request->request->get('mail_type') == 'Premiumx3' ||
+                $request->request->get('mail_type') == 'Premiumx6' ||
+                $request->request->get('mail_type') == 'Premiumx12') {
                 $notificationType = 'Proposition';
                 $notificationTitle = 'Proposition d\'un pack ' . $request->request->get('mail_type');
-            }elseif($request->request->get('mail_type') == 'Accompagnementx1' || 
-            $request->request->get('mail_type') == 'Accompagnementx2' ||
-            $request->request->get('mail_type') == 'Accompagnementx3' ||
-            $request->request->get('mail_type') == 'Accompagnementx6' ||
-            $request->request->get('mail_type') == 'Accompagnementx12'){
+            } elseif ($request->request->get('mail_type') == 'Accompagnementx1' ||
+                $request->request->get('mail_type') == 'Accompagnementx2' ||
+                $request->request->get('mail_type') == 'Accompagnementx3' ||
+                $request->request->get('mail_type') == 'Accompagnementx6' ||
+                $request->request->get('mail_type') == 'Accompagnementx12') {
                 $notificationType = 'Proposition';
                 $notificationTitle = 'Proposition d\'un pack ' . $request->request->get('mail_type');
-            }else{
+            } else {
                 $notificationType = 'Mail';
-                $notificationTitle =$mail->getObject();
+                $notificationTitle = $mail->getObject();
             }
-            
+
             $notificationsPathService->setNotificationPath($notifications, $notificationType, $notificationTitle, $message, new \DateTimeImmutable('now'), $lead_id);
-            
+
             $mail->setSender($sender);
             $mail->setRecipient($recipient);
             $mail->setCreatedAt(new \DateTimeImmutable('now'));
@@ -256,7 +266,7 @@ class CalendlyController extends AbstractController
                 ->subject($mail->getObject())
                 ->htmlTemplate('email/contact.html.twig')
                 ->context([
-                    'message' => $message
+                    'message' => $message,
                 ]);
             $mailer->send($send);
 
@@ -264,11 +274,9 @@ class CalendlyController extends AbstractController
             $entityManager->persist($mail);
             $entityManager->flush();
 
-            
-
             return $this->redirectToRoute('app_home', [
                 'id' => $id,
-                'lead_id' => $lead_id
+                'lead_id' => $lead_id,
             ]);
         }
 
@@ -286,24 +294,25 @@ class CalendlyController extends AbstractController
             'accompagnement' => $accompagnement,
             'premium' => $premium,
             'mail_closing' => $mail_closing,
-            'own_mail' => $own_mail
-            
+            'own_mail' => $own_mail,
+
         ]);
     }
 
     /**
      * @Route("/choose", name="choose")
      */
-    public function choose(LeadMembershipRepository $leadMembershipRepository, Request $request){
-        
+    public function choose(LeadMembershipRepository $leadMembershipRepository, Request $request)
+    {
+
         $user = $this->getUser();
-        
+
         $lead_id = $request->query->get('lead_id');
 
         $form_choose = $this->createForm(LeadMembershipFormType::class);
         $form_choose->handleRequest($request);
 
-        if($request->isMethod('POST')){
+        if ($request->isMethod('POST')) {
             $notifications = new Notifs();
             $notifications->setType('give_lead');
             $notifications->setUserFrom($user->getFirstName());
@@ -319,7 +328,7 @@ class CalendlyController extends AbstractController
 
         return $this->render('main/modal/modal_change_lead.html.twig', [
             'form_choose' => $form_choose->createView(),
-            'lead_id' => $lead_id
+            'lead_id' => $lead_id,
         ]);
     }
 
